@@ -263,7 +263,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
@@ -293,4 +293,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &973316025
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 973316027}
+  - component: {fileID: 973316026}
+  m_Layer: 0
+  m_Name: TerrainManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &973316026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973316025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e3aefae4d4134297bf9f132eb2a3667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TerrainInfos:
+  - type: 0
+    mat: {fileID: 2100000, guid: 31da9ad15ff664db5b4db359a07007b5, type: 2}
+  - type: 1
+    mat: {fileID: 2100000, guid: 97e8c8a95480842c29626da3c281529b, type: 2}
+  - type: 2
+    mat: {fileID: 2100000, guid: 7afbdd72b44984c1a8fada12ad5e7a74, type: 2}
+  - type: 3
+    mat: {fileID: 2100000, guid: e7e1b2f201e644c379cf93c5f98778f0, type: 2}
+  TerrainProps:
+  - propPrefab: {fileID: 5179484007214689567, guid: 798098305dff24196b589a3054d46706,
+      type: 3}
+    propAccessibility: 1
+    propTerrain: 0
+  - propPrefab: {fileID: 6321995580084697199, guid: 77b14236b4ac0485f8d0f01cf78e5660,
+      type: 3}
+    propAccessibility: 1
+    propTerrain: 2
+  TerrainStripPrefab: {fileID: 6158682865970832215, guid: 9dffd366d6fd0492d8c8640c338110b0,
+    type: 3}
+--- !u!4 &973316027
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973316025}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.7629137, y: -0.43581796, z: 1.943096}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
