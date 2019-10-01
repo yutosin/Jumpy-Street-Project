@@ -222,6 +222,7 @@ GameObject:
   - component: {fileID: 845652040}
   - component: {fileID: 845652039}
   - component: {fileID: 845652038}
+  - component: {fileID: 845652041}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -264,7 +265,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 4.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -287,13 +288,25 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 845652037}
-  m_LocalRotation: {x: 0.43089792, y: -0.23477894, z: 0.11716758, w: 0.8634105}
-  m_LocalPosition: {x: 3.8669853, y: 11.415477, z: -3.31083}
+  m_LocalRotation: {x: 0.29357782, y: -0.20642203, z: 0.0650846, w: 0.9311101}
+  m_LocalPosition: {x: 6, y: 10, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 35, y: -25, z: 0}
+--- !u!114 &845652041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845652037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e25aa77edaf8f436a9415699f56c1b54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &973316025
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,14 +348,15 @@ MonoBehaviour:
   TerrainProps:
   - propPrefab: {fileID: 5179484007214689567, guid: 798098305dff24196b589a3054d46706,
       type: 3}
-    propAccessibility: 1
+    propAccessibility: 0
     propTerrain: 0
   - propPrefab: {fileID: 6321995580084697199, guid: 77b14236b4ac0485f8d0f01cf78e5660,
       type: 3}
-    propAccessibility: 1
+    propAccessibility: 0
     propTerrain: 2
   TerrainStripPrefab: {fileID: 6158682865970832215, guid: 9dffd366d6fd0492d8c8640c338110b0,
     type: 3}
+  NumStrips: 25
 --- !u!4 &973316027
 Transform:
   m_ObjectHideFlags: 0
@@ -376,6 +390,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.15, y: 0.15, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1170862232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170862229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05dc95c93f38f4a9da8ae3b3a3e2832b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stripManager: {fileID: 973316026}
 --- !u!1001 &1640556316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -391,7 +418,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 291dffd359fb744708fe5c3611d079ee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 291dffd359fb744708fe5c3611d079ee,
         type: 3}
