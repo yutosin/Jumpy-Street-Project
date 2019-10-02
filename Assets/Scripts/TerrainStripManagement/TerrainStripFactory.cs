@@ -10,6 +10,10 @@ public struct Prop
     public TerrainType propTerrain;
 }
 
+/*TerrainStripFactory is the home of TerrainStrip creation. It determines the TerrainType and what props appear on each
+  individual TerrainStrip. It also assigns TerrainStripManagers. It also provides the actual Vector3 position based off
+  the cells in our grid.*/
+
 public class TerrainStripFactory : MonoBehaviour
 {
     private List<TerrainStrip> _strips;
@@ -18,15 +22,17 @@ public class TerrainStripFactory : MonoBehaviour
     
     private int currentStrip
     {
-        get { return this._currentStrip; }
-        set { this._currentStrip = Mathf.Clamp(value, 0, _strips.Count - 1); }
+        get { return _currentStrip; }
+        set { _currentStrip = Mathf.Clamp(value, 0, _strips.Count - 1); }
     }
     
-    public List<TerrainInfo> TerrainInfos;
-    public List<Prop> TerrainProps;
+    //Set in editor
+    public List<TerrainInfo> TerrainInfos; //Provides the TerrainTypes and associated materials that we use for TerrainStrips
+    public List<Prop> TerrainProps; //The prope that can be placed in TerrainStrips
     public GameObject TerrainStripPrefab;
     public int NumStrips;
-
+    
+    [HideInInspector]
     public static float GenSpeed;
     
     // Start is called before the first frame update
@@ -35,23 +41,12 @@ public class TerrainStripFactory : MonoBehaviour
         _strips = new List<TerrainStrip>(NumStrips);
         for (int i = 0; i < _strips.Capacity; i++)
         {
-//            GameObject tempStrip = Instantiate(TerrainStripPrefab, new Vector3(0, 0, i - 5), Quaternion.identity);
-//            _strips.Add(tempStrip.GetComponent<TerrainStrip>());
-//            int randMat = Random.Range(0, TerrainInfos.Count);
-//            int randProp = Random.Range(0, TerrainProps.Count);
-//
-//            if (i < 6)
-//            {
-//                _strips[i].SetupTerrainStrip(TerrainInfos[0]);
-//                continue;
-//            }
-//
-//            _strips[i].SetupTerrainStrip(TerrainInfos[randMat], TerrainProps[randProp]);
             AddNewStrip();
         }
 
         currentStrip = 5;
         TerrainStrip.StripDestroyed += OnStripDestroy;
+        //Play around with value; still some situations where we run out of terrain
         GenSpeed = 1;
         StartCoroutine(StripGenEnumerator());
     }
@@ -63,6 +58,7 @@ public class TerrainStripFactory : MonoBehaviour
         int randMat = Random.Range(0, TerrainInfos.Count);
         int randProp = Random.Range(0, TerrainProps.Count);
         
+        //Want the first 5 strips to be all grass strips
         if (_strips.Count < 6)
         {
             _strips[_strips.Count - 1].SetupTerrainStrip(TerrainInfos[0]);
@@ -78,11 +74,6 @@ public class TerrainStripFactory : MonoBehaviour
         {
             AddNewStrip();
             
-//            Destroy(_strips[0].gameObject);
-//            _strips.RemoveAt(0);
-//
-//            currentStrip = --currentStrip;
-            
             yield return new WaitForSeconds(GenSpeed);
         }
     }
@@ -96,35 +87,26 @@ public class TerrainStripFactory : MonoBehaviour
 
     public Vector3 GetNextPosition(MoveDirection direction)
     {
-        Cell temp;
         switch (direction)
         {
-            //Clean this up, still a bit of repeated code
             case MoveDirection.UP:
                 ++currentStrip;
-                temp = _strips[currentStrip].GetCell(direction);
-                if (!temp.accessible)
-                {
+                bool accessible = _strips[currentStrip].GetCell(direction).accessible;
+                if (!accessible)
                     --currentStrip;
-                    temp = _strips[currentStrip].GetCell(direction);
-                }
 
                 break;
             case MoveDirection.DOWN:
                 --currentStrip;
-                temp = _strips[currentStrip].GetCell(direction);
-                if (!temp.accessible)
-                {
+                accessible = _strips[currentStrip].GetCell(direction).accessible;
+                if (!accessible)
                     ++currentStrip;
-                    temp = _strips[currentStrip].GetCell(direction);
-                }
 
                 break;
             default:
-                temp = _strips[currentStrip].GetCell(direction);
                 break;
         }
-        Debug.Log(temp.gridPos);
+        Cell temp = _strips[currentStrip].GetCell(direction);
         return temp.gridPos;
     }
 

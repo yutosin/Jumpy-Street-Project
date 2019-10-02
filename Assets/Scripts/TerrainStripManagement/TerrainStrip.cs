@@ -2,14 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum MoveDirection
-{
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
-}
-
 public enum TerrainType
 {
     Grass,
@@ -31,39 +23,45 @@ public struct TerrainInfo
     public Material mat;
 }
 
+/*TerrainStrips are part of the grid system used for movement. Considering a grid, a TerrainStrip is essentially an
+  an entire row of a grid. TerrainStrips contain Cells all along the x axis for its width. These Cells are used to 
+  assign the player a position when moving and for prop placement.*/
+
 public class TerrainStrip : MonoBehaviour
 {
     private List<Cell> _cells;
     private TerrainInfo _terrainInfo;
-    private TerrainType _type;
     private List<GameObject> _props;
     
     private static int _currentCell = 11;
-    
-    public delegate void OnStripDestroy(TerrainStrip strip);
 
+    private static int CurrentCell
+    {
+        get { return _currentCell; }
+        set { _currentCell =  Mathf.Clamp(value, 0, 19); }
+    }
+
+    public delegate void OnStripDestroy(TerrainStrip strip);
+    
+    //Event used by TerrainStripFactory to know when to remove a TerrainStrip from the TerrainStrip master list
     public static event OnStripDestroy StripDestroyed;
 
     public TerrainType Type
     {
-        get { return _type; }
+        get { return _terrainInfo.type; }
     }
 
-    public void SetupTerrainStrip(TerrainInfo terrainInfo, Prop prop)
+    public void SetupTerrainStrip(TerrainInfo terrainInfo, Prop prop = new Prop())
     {
-        _cells = new List<Cell>(20);
-        _props = new List<GameObject>(20);
+        _cells = new List<Cell>(20); //All strips contain 20 cells corresponding to their width
+        _props = new List<GameObject>(20); 
         SetTerrainInfo(terrainInfo);
-        CreateCells(transform.position.z, prop);
-    }
-    
-    //Clean this up: may be able to use default param for prop and do check before calling CreateCells
-    public void SetupTerrainStrip(TerrainInfo terrainInfo)
-    {
-        _cells = new List<Cell>(20);
-        _props = new List<GameObject>(20);
-        SetTerrainInfo(terrainInfo);
-        CreateCells(transform.position.z);
+        if (prop.propPrefab != null)
+        {
+            CreateCells(prop);
+            return;
+        }
+        CreateCells();
     }
 
     private void SetTerrainInfo(TerrainInfo terrainInfo)
@@ -73,20 +71,21 @@ public class TerrainStrip : MonoBehaviour
         {
             _terrainInfo = terrainInfo;
             rend.material = _terrainInfo.mat;
-            _type = _terrainInfo.type;
         }
     }
 
-    private void CreateCells(float zPos, Prop prop = new Prop())
+    private void CreateCells(Prop prop = new Prop())
     {
-        float xBase = -9.5f;
-        float xInc = 1;
+        float xPosBase = -9.5f; //Left most x position on TerrainStrip; offset by .5 to get center
+        float xPosIncrement = 1;
+        float zPos = transform.position.z;
         for (int i = 0; i < _cells.Capacity; i++)
         {
-            int objectChance = Random.Range(1, 4);
+            // Chance of prop beign spawned in a cell
+            int objectChance = Random.Range(1, 4); //balance this
             
             Cell tempCell = new Cell();
-            tempCell.gridPos = new Vector3(xBase + (i * xInc), 0, zPos);
+            tempCell.gridPos = new Vector3(xPosBase + (i * xPosIncrement), 0, zPos);
             
             if (objectChance == 1 && prop.propPrefab != null)
             {
@@ -106,19 +105,20 @@ public class TerrainStrip : MonoBehaviour
 
     public Cell GetCell(MoveDirection direction)
     {
-        //Clean up: better bounds checking on _currentCell; see TerrainStripFacotry
         switch (direction)
         {
             case MoveDirection.UP:
             case MoveDirection.DOWN:
                 break;
             case MoveDirection.LEFT:
-                if ((_currentCell - 1) > 0 && _cells[_currentCell - 1].accessible)
-                    _currentCell--;
+                --CurrentCell;
+                if (!_cells[CurrentCell].accessible)
+                    ++CurrentCell;
                 break;
             case MoveDirection.RIGHT:
-                if ((_currentCell + 1) < _cells.Count && _cells[_currentCell + 1].accessible)
-                    _currentCell++;
+                ++CurrentCell;
+                if (!_cells[CurrentCell].accessible)
+                    --CurrentCell;
                 break;
             default:
                 break;
@@ -126,27 +126,7 @@ public class TerrainStrip : MonoBehaviour
         return _cells[_currentCell];
     }
 
-//    private void OnBecameInvisible()
-//    {
-//        foreach (var prop in _props)
-//        {
-//            Destroy(prop.gameObject);
-//        }
-//        
-//        if (StripDestroyed != null)
-//            StripDestroyed.Invoke(this);
-//        Destroy(gameObject);
-//    }
-
-    private void OnDestroy()
-    {
-        foreach (var prop in _props)
-        {
-            Destroy(prop.gameObject);
-        }
-    }
-    
-    private void Update()
+    private void BoundsCheck()
     {
         Vector3 viewPos = CameraManager.Cam.WorldToViewportPoint(transform.position);
         if (viewPos.x < -0.2 || viewPos.y < -0.2)
@@ -159,5 +139,10 @@ public class TerrainStrip : MonoBehaviour
             }
             Destroy(gameObject);
         }
+    }
+    
+    private void Update()
+    {
+        BoundsCheck();
     }
 }

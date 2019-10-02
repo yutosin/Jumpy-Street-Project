@@ -17,6 +17,8 @@ public class CameraManager : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
+        /*Move the camera slowly along the z axis; speed can be modified at times by the player getting closer to the top
+          of the screen*/
         Vector3 tempPos = transform.position;
         tempPos.z += speed * Time.fixedDeltaTime;
         transform.position = tempPos;
