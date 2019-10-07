@@ -19,7 +19,7 @@ public struct Prop
 public class TerrainStripFactory : MonoBehaviour
 {
     //22 strips visible to camera at any given time
-    private List<TerrainStrip> _strips; //object pool these strips with a dictionary; zpos as keys
+    //private List<TerrainStrip> _strips; //object pool these strips with a dictionary; zpos as keys
     private Dictionary<int, TerrainStrip> _stripPool;
     private Stack<int> _unusedStrips;
     private int _currentStrip; //do not access directly!! use currentStrip
@@ -28,7 +28,7 @@ public class TerrainStripFactory : MonoBehaviour
     private int currentStrip
     {
         get { return _currentStrip; }
-        set { _currentStrip = Mathf.Clamp(value, 0, _strips.Count - 1); }
+        set { _currentStrip = Mathf.Clamp(value, 0,  _lastStripPos); }
     }
     
     //Set in editor
@@ -37,7 +37,7 @@ public class TerrainStripFactory : MonoBehaviour
     public GameObject TerrainStripPrefab;
     public int NumStrips;
     
-    public static Dictionary<Prop, List<Prop>> PoolDictionary;
+    public static Dictionary<TerrainType, List<Prop>> PoolDictionary;
     
     [HideInInspector]
     public static float GenSpeed;
@@ -45,18 +45,28 @@ public class TerrainStripFactory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _strips = new List<TerrainStrip>(NumStrips);
-        for (int i = 0; i < _strips.Capacity; i++)
+//        _strips = new List<TerrainStrip>(NumStrips);
+//        for (int i = 0; i < NumStrips; i++)
+//        {
+//            AddNewStrip();
+//        }
+//        
+        PoolDictionary = new Dictionary<TerrainType, List<Prop>>();
+        CreatePropPools();
+        
+        _stripPool = new Dictionary<int, TerrainStrip>(NumStrips);
+        for (int i = 0; i < NumStrips; i++)
         {
             AddNewStrip();
         }
+        
+        _unusedStrips = new Stack<int>();
 
-        currentStrip = 5;
-        TerrainStrip.StripDestroyed += OnStripDestroy;
+        currentStrip = 0;
         TerrainStrip.StripInactive += OnStripInactive;
         //Play around with value; still some situations where we run out of terrain
-        GenSpeed = 1f;
-        StartCoroutine(StripGenEnumerator());
+        GenSpeed = .4f;
+//        StartCoroutine(StripGenEnumerator());
     }
     
     /// <summary>
@@ -65,14 +75,6 @@ public class TerrainStripFactory : MonoBehaviour
     /// terrain strip in response to on strip destroy (now on strip unused or something). reassign terrain strip will have
     /// similar behavior to setup terrain strip since it needs terrain info and prop info
     /// </summary>
-    private void CreateStripPool()
-    {
-        _strips = new List<TerrainStrip>(NumStrips);
-        for (int i = 0; i < _strips.Capacity; i++)
-        {
-            AddNewStrip();
-        }
-    }
 
     private void CreatePropPools()
     {
@@ -84,9 +86,10 @@ public class TerrainStripFactory : MonoBehaviour
                 Prop tempProp = prop;
                 tempProp.gameObject = Instantiate(prop.propPrefab, Vector3.zero, Quaternion.identity);
                 tempProp.gameObject.SetActive(false);
+                tempProp.available = true;
                 newPropPool.Add(tempProp);
             }
-            PoolDictionary.Add(prop, newPropPool);
+            PoolDictionary.Add(prop.propTerrain, newPropPool);
         }
     }
     
@@ -97,8 +100,9 @@ public class TerrainStripFactory : MonoBehaviour
     void AddNewStrip()
     {
         GameObject tempStrip =
-            Instantiate(TerrainStripPrefab, new Vector3(0, 0, _lastStripPos++), Quaternion.identity);
-        _strips.Add(tempStrip.GetComponent<TerrainStrip>());
+            Instantiate(TerrainStripPrefab, new Vector3(0, 0, _lastStripPos), Quaternion.identity);
+//        _strips.Add(tempStrip.GetComponent<TerrainStrip>());
+        _stripPool.Add(_lastStripPos, tempStrip.GetComponent<TerrainStrip>());
 
         //Could try a weighted distribution for TerrainType but...may need to be context sensitive?
         //Possibly get last strip and have a certain chance of repeating last strip type depending on strip?
@@ -143,35 +147,38 @@ public class TerrainStripFactory : MonoBehaviour
         int randProp = Random.Range(0, TerrainProps.Count);
 
         //Want the first 5 strips to be all grass strips
-        if (_strips.Count < 6)
+        if (_stripPool.Count < 6)
         {
-            _strips[_strips.Count - 1].SetupTerrainStrip(TerrainInfos[0]);
+            _stripPool[_lastStripPos].SetupTerrainStrip(TerrainInfos[0]);
+            _lastStripPos++;
             return;
         }
 
-        _strips[_strips.Count - 1].SetupTerrainStrip(TerrainInfos[randMat], TerrainProps[randProp]);
+        _stripPool[_lastStripPos].SetupTerrainStrip(TerrainInfos[randMat], TerrainProps[randProp]);
+        _lastStripPos++;
     }
 
-    IEnumerator StripGenEnumerator()
-    {
-        while (true)
-        {
-            AddNewStrip();
-            
-            yield return new WaitForSeconds(GenSpeed);
-        }
-    }
-
-    private void OnStripDestroy(TerrainStrip strip)
-    {
-        _strips.Remove(strip);
-
-        currentStrip = --currentStrip;
-    }
-    
-    private void OnStripInactive(TerrainStrip strip)
+//    IEnumerator StripGenEnumerator()
+//    {
+//        while (true)
+//        {
+//            AddTerrainStrip();
+//            
+//            yield return new WaitForSecondsRealtime(GenSpeed);
+//        }
+//    }
+//    
+    private void OnStripInactive(TerrainStrip strip, Prop[] propsForList)
     {
         _unusedStrips.Push(strip.zPosKey);
+        if (propsForList.Length == 0)
+            return;
+        List<Prop> propPool = PoolDictionary[propsForList[0].propTerrain];
+        for (int i = 0; i < propsForList.Length; i++)
+        {
+            propPool.Add(propsForList[i]);
+        }
+        AddTerrainStrip();
     }
 
     public Vector3 GetNextPosition(MoveDirection direction)
@@ -180,14 +187,14 @@ public class TerrainStripFactory : MonoBehaviour
         {
             case MoveDirection.UP:
                 ++currentStrip;
-                bool accessible = _strips[currentStrip].GetCell(direction).accessible;
+                bool accessible = _stripPool[currentStrip].GetCell(direction).accessible;
                 if (!accessible)
                     --currentStrip;
 
                 break;
             case MoveDirection.DOWN:
                 --currentStrip;
-                accessible = _strips[currentStrip].GetCell(direction).accessible;
+                accessible = _stripPool[currentStrip].GetCell(direction).accessible;
                 if (!accessible)
                     ++currentStrip;
 
@@ -195,38 +202,45 @@ public class TerrainStripFactory : MonoBehaviour
             default:
                 break;
         }
-        Cell temp = _strips[currentStrip].GetCell(direction);
+        Cell temp = _stripPool[currentStrip].GetCell(direction);
         return temp.gridPos;
     }
 
     private void AddTerrainStrip()
     {
-        if (_unusedStrips.Count == 0)
+        if (_unusedStrips.Count > 0)
+        {
+            int stripKey = _unusedStrips.Pop();
+            TerrainStrip unusedStrip = _stripPool[stripKey];
+            unusedStrip.gameObject.transform.position = new Vector3(0, 0, _lastStripPos);
+
+            int randMat = Random.Range(0, TerrainInfos.Count);
+            int randProp = Random.Range(0, TerrainProps.Count);
+            //gotta remove and readd to dictionary as well as reassign info
+
+            unusedStrip.ReassignTerrainStrip(TerrainInfos[randMat], TerrainProps[randProp]);
+
+            _stripPool.Add(_lastStripPos, unusedStrip);
+            _stripPool.Remove(stripKey);
+            _lastStripPos++;
+        }
+        else
         {
             AddNewStrip();
         }
-
-        int stripKey = _unusedStrips.Pop();
-        TerrainStrip unusedStrip = _stripPool[stripKey];
-        unusedStrip.transform.position = new Vector3(0, 0, _lastStripPos++);
-        
-        int randMat = Random.Range(0, TerrainInfos.Count);
-        int randProp = Random.Range(0, TerrainProps.Count);
-        //gotta remove and readd to dictionary as well as reassign info
-        
-        unusedStrip.ReassignTerrainStrip(TerrainInfos[randMat], TerrainProps[randProp]);
-
-        _stripPool.Add(_lastStripPos, unusedStrip);
-        _stripPool.Remove(stripKey);
     }
 
     public static Prop GetUsablePropFromPool(Prop prop)
     {
-        List<Prop> propPool = PoolDictionary[prop];
+        List<Prop> propPool = PoolDictionary[prop.propTerrain];
         for (int i = 0; i < propPool.Count; i++)
         {
             if (propPool[i].available)
-                return propPool[i];
+            {
+                var tempCell = propPool[i];
+                propPool.Remove(propPool[i]);
+                return tempCell;
+            }
         }
         Prop newProp = new Prop();
         newProp.propPrefab = prop.propPrefab;
@@ -236,7 +250,7 @@ public class TerrainStripFactory : MonoBehaviour
 
         newProp.gameObject = Instantiate(prop.propPrefab, Vector3.zero, Quaternion.identity);
         
-        propPool.Add(newProp);
+        //propPool.Add(newProp);
 
         return newProp;
     }
