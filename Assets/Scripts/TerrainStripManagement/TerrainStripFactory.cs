@@ -22,6 +22,7 @@ public class TerrainStripFactory : MonoBehaviour
     private static Dictionary<TerrainType, List<GameObject>> _poolDictionary;
     private int _currentStrip; //do not access directly!! use currentStrip
     private int _lastStripPos = -5;
+    private int _sameStripCount = 0;
     
     private int currentStrip
     {
@@ -74,46 +75,6 @@ public class TerrainStripFactory : MonoBehaviour
             Instantiate(TerrainStripPrefab, new Vector3(0, 0, _lastStripPos), Quaternion.identity);
         _stripPool.Add(_lastStripPos, tempStrip.GetComponent<TerrainStrip>());
 
-        //Could try a weighted distribution for TerrainType but...may need to be context sensitive?
-        //Possibly get last strip and have a certain chance of repeating last strip type depending on strip?
-//            int randMat = 0;
-//            float randValue = Random.value;
-//            Debug.Log(randValue);
-//            if (_strips.Count > 1)
-//            {
-//                TerrainType lasTerrainType = _strips[_strips.Count - 1].Type;
-//                switch (lasTerrainType)
-//                {
-//                    case TerrainType.Grass:
-//                        if (randValue <= .2f)
-//                            randMat = 0;
-//                        else
-//                            randMat = Random.Range(0, TerrainInfos.Count);
-//                        break;
-//                    case TerrainType.River:
-//                        if (randValue <= .2f)
-//                            randMat = 1;
-//                        else
-//                            randMat = Random.Range(0, TerrainInfos.Count);
-//                        break;
-//                    case TerrainType.Road:
-//                        if (randValue <= .9f)
-//                            randMat = 2;
-//                        else
-//                            randMat = Random.Range(0, TerrainInfos.Count);
-//                        break;
-//                    case TerrainType.Train:
-//                        if (randValue <= .2f)
-//                            randMat = 3;
-//                        else
-//                            randMat = Random.Range(0, TerrainInfos.Count);
-//                        break;
-//                }
-//            }
-//            else
-//                randMat = Random.Range(0, TerrainInfos.Count);
-
-        int randMat = Random.Range(0, TerrainInfos.Count);
         int randProp = Random.Range(0, TerrainProps.Count);
 
         //Want the first 5 strips to be all grass strips
@@ -123,9 +84,122 @@ public class TerrainStripFactory : MonoBehaviour
             _lastStripPos++;
             return;
         }
-
-        _stripPool[_lastStripPos].SetupTerrainStrip(TerrainInfos[randMat], TerrainProps[randProp]);
+        
+        TerrainInfo newTerrainInfo = CreateWeightedTerrainInfo();
+        if (newTerrainInfo.type == TerrainType.Grass || newTerrainInfo.type == TerrainType.River)
+            _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[randProp]);
+        else
+            _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo);
         _lastStripPos++;
+    }
+    
+    private void AddTerrainStrip()
+    {
+        if (_unusedStrips.Count > 0)
+        {
+            int stripKey = _unusedStrips.Pop();
+            TerrainStrip unusedStrip = _stripPool[stripKey];
+            unusedStrip.gameObject.transform.position = new Vector3(0, 0, _lastStripPos);
+
+            int randProp = Random.Range(0, TerrainProps.Count);
+
+            TerrainInfo newTerrainInfo = CreateWeightedTerrainInfo();
+            if (newTerrainInfo.type == TerrainType.Grass || newTerrainInfo.type == TerrainType.River)
+                unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[randProp]);
+            else
+                unusedStrip.ReassignTerrainStrip(newTerrainInfo);
+
+            _stripPool.Add(_lastStripPos, unusedStrip);
+            _stripPool.Remove(stripKey);
+            _lastStripPos++;
+        }
+        else
+        {
+            AddNewStrip();
+        }
+    }
+
+    private TerrainInfo CreateWeightedTerrainInfo()
+    {
+        //Could try a weighted distribution for TerrainType but...may need to be context sensitive?
+        //Possibly get last strip and have a certain chance of repeating last strip type depending on strip?
+        int randTerrain = 0;
+        float randValue = Random.value;
+        if (_stripPool.Count > 1)
+        {
+            TerrainType lasTerrainType = _stripPool[_lastStripPos - 1].Type;
+            switch (lasTerrainType)
+            {
+                case TerrainType.Grass:
+                    if (randValue <= .2f && _sameStripCount < 3)
+                    {
+                        randTerrain = 0;
+                        _sameStripCount++;
+                    }
+                    else
+                    {
+                        //randTerrain = Random.Range(1, TerrainInfos.Count);
+                        randTerrain = RandomRangeExcept(0, TerrainInfos.Count, 0);
+                        _sameStripCount = 0;
+                    }
+
+                    break;
+                case TerrainType.River:
+                    if (randValue <= .5f && _sameStripCount < 5)
+                    {
+                        randTerrain = 1;
+                        _sameStripCount++;
+                    }
+                    else
+                    {
+                        randTerrain = RandomRangeExcept(0, TerrainInfos.Count, 1);
+                        _sameStripCount = 0;
+                    }
+
+                    break;
+                case TerrainType.Road:
+                    if (randValue <= .7f && _sameStripCount < 5)
+                    {
+                        randTerrain = 2;
+                        _sameStripCount++;
+                    }
+                    else
+                    {
+                        randTerrain = RandomRangeExcept(0, TerrainInfos.Count, 2);
+                        _sameStripCount = 0;
+                    }
+
+                    break;
+                case TerrainType.Train:
+                    if (randValue <= .1f && _sameStripCount < 3)
+                    {
+                        randTerrain = 3;
+                        _sameStripCount++;
+                    }
+                    else
+                    {
+                        randTerrain = RandomRangeExcept(0, TerrainInfos.Count, 3);
+                        _sameStripCount = 0;
+                    }
+
+                    break;
+            }
+        }
+        else
+            randTerrain = Random.Range(0, TerrainInfos.Count);
+
+        return TerrainInfos[randTerrain];
+    }
+
+    private int RandomRangeExcept(int min, int max, int except)
+    {
+        int randomNum;
+        do
+        {
+            randomNum = Random.Range(min, max);
+        } while (randomNum == except);
+
+        return randomNum;
     }
     
     private void OnStripInactive(TerrainStrip strip)
@@ -157,29 +231,6 @@ public class TerrainStripFactory : MonoBehaviour
         }
         Cell temp = _stripPool[currentStrip].GetCell(direction);
         return temp.gridPos;
-    }
-
-    private void AddTerrainStrip()
-    {
-        if (_unusedStrips.Count > 0)
-        {
-            int stripKey = _unusedStrips.Pop();
-            TerrainStrip unusedStrip = _stripPool[stripKey];
-            unusedStrip.gameObject.transform.position = new Vector3(0, 0, _lastStripPos);
-
-            int randMat = Random.Range(0, TerrainInfos.Count);
-            int randProp = Random.Range(0, TerrainProps.Count);
-
-            unusedStrip.ReassignTerrainStrip(TerrainInfos[randMat], TerrainProps[randProp]);
-
-            _stripPool.Add(_lastStripPos, unusedStrip);
-            _stripPool.Remove(stripKey);
-            _lastStripPos++;
-        }
-        else
-        {
-            AddNewStrip();
-        }
     }
 
     public static GameObject GetUsablePropFromPool(Prop prop)
