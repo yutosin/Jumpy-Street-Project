@@ -348,15 +348,19 @@ MonoBehaviour:
   TerrainProps:
   - propPrefab: {fileID: 5179484007214689567, guid: 798098305dff24196b589a3054d46706,
       type: 3}
+    gameObject: {fileID: 0}
     propAccessibility: 0
     propTerrain: 0
+    available: 0
   - propPrefab: {fileID: 6321995580084697199, guid: 77b14236b4ac0485f8d0f01cf78e5660,
       type: 3}
+    gameObject: {fileID: 0}
     propAccessibility: 0
     propTerrain: 2
+    available: 0
   TerrainStripPrefab: {fileID: 6158682865970832215, guid: 9dffd366d6fd0492d8c8640c338110b0,
     type: 3}
-  NumStrips: 25
+  NumStrips: 30
 --- !u!4 &973316027
 Transform:
   m_ObjectHideFlags: 0
