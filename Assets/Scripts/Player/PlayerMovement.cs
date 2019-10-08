@@ -33,20 +33,15 @@ public class PlayerMovement : MonoBehaviour
             Destroy(gameObject);
         }
         
-        //Might want to have camera speed move on a gradient?? depends on playtesting
-        
-        //check if the player is getting close to the top of the screen and speed up camera speed and terrain strip gen
-        //in response
-        if (viewPos.y > .6f)
-        {
-            CameraManager.speed = 2f;
-            TerrainStripFactory.GenSpeed = .35f;
-        }
-        else
-        {
-            CameraManager.speed = 1f;
-            TerrainStripFactory.GenSpeed = 1;
-        }
+        //To do: modify this to somehow keep consistent speed on camera when close to bottom of screen?
+//        if (viewPos.y > .6f)
+//        {
+//            CameraManager.speed = 2f;
+//        }
+//        else
+//        {
+//            CameraManager.speed = 1f;
+//        }
     }
 
     private Vector3 HandleMovement()

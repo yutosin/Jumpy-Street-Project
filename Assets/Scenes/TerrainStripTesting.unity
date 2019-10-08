@@ -307,6 +307,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e25aa77edaf8f436a9415699f56c1b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  target: {fileID: 1170862231}
 --- !u!1 &973316025
 GameObject:
   m_ObjectHideFlags: 0
@@ -348,15 +349,17 @@ MonoBehaviour:
   TerrainProps:
   - propPrefab: {fileID: 5179484007214689567, guid: 798098305dff24196b589a3054d46706,
       type: 3}
+    gameObject: {fileID: 0}
     propAccessibility: 0
     propTerrain: 0
   - propPrefab: {fileID: 6321995580084697199, guid: 77b14236b4ac0485f8d0f01cf78e5660,
       type: 3}
+    gameObject: {fileID: 0}
     propAccessibility: 0
     propTerrain: 2
   TerrainStripPrefab: {fileID: 6158682865970832215, guid: 9dffd366d6fd0492d8c8640c338110b0,
     type: 3}
-  NumStrips: 25
+  NumStrips: 30
 --- !u!4 &973316027
 Transform:
   m_ObjectHideFlags: 0
@@ -390,6 +393,12 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.15, y: 0.15, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1170862231 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: 291dffd359fb744708fe5c3611d079ee,
+    type: 3}
+  m_PrefabInstance: {fileID: 1640556316}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1170862232
 MonoBehaviour:
   m_ObjectHideFlags: 0
