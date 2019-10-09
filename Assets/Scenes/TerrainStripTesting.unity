@@ -531,16 +531,18 @@ MonoBehaviour:
   - type: 3
     mat: {fileID: 2100000, guid: e7e1b2f201e644c379cf93c5f98778f0, type: 2}
   TerrainProps:
-  - propPrefab: {fileID: 5179484007214689567, guid: 798098305dff24196b589a3054d46706,
+  - propPrefab: {fileID: 2477329625610452423, guid: bb24a3b6159644a768be8d8e1d9e6d81,
       type: 3}
     gameObject: {fileID: 0}
     propAccessibility: 0
     propTerrain: 0
-  - propPrefab: {fileID: 6321995580084697199, guid: 77b14236b4ac0485f8d0f01cf78e5660,
+    yOffset: 0
+  - propPrefab: {fileID: 1745515611961053849, guid: 2123786f46b1d404ba565c9297423b97,
       type: 3}
     gameObject: {fileID: 0}
-    propAccessibility: 0
-    propTerrain: 2
+    propAccessibility: 1
+    propTerrain: 1
+    yOffset: -0.2
   TerrainStripPrefab: {fileID: 6158682865970832215, guid: 9dffd366d6fd0492d8c8640c338110b0,
     type: 3}
   NumStrips: 30

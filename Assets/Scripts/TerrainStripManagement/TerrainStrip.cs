@@ -111,7 +111,7 @@ public class TerrainStrip : MonoBehaviour
             {
                 Prop cellProp = prop;
                 cellProp.gameObject = TerrainStripFactory.GetUsablePropFromPool(prop);
-                cellProp.gameObject.transform.position = new Vector3(tempCell.gridPos.x, 1, tempCell.gridPos.z);
+                cellProp.gameObject.transform.position = new Vector3(tempCell.gridPos.x, 1 + prop.yOffset, tempCell.gridPos.z);
                 cellProp.gameObject.SetActive(true);
                 
                 _testProps.Add(cellProp);

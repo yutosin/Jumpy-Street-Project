@@ -9,6 +9,7 @@ public struct Prop
     public GameObject gameObject;
     public bool propAccessibility;
     public TerrainType propTerrain;
+    public float yOffset;
 }
 
 /*TerrainStripFactory is the home of TerrainStrip creation. It determines the TerrainType and what props appear on each
@@ -61,7 +62,7 @@ public class TerrainStripFactory : MonoBehaviour
             List<GameObject> newPropPool = new List<GameObject>(20);
             for (int i = 0; i < newPropPool.Capacity; i++)
             {
-                GameObject propRef = Instantiate(prop.propPrefab, Vector3.zero, Quaternion.identity);
+                GameObject propRef = Instantiate(prop.propPrefab, Vector3.zero, prop.propPrefab.transform.rotation);
                 propRef.SetActive(false);
                 newPropPool.Add(propRef);
             }
@@ -75,6 +76,7 @@ public class TerrainStripFactory : MonoBehaviour
             Instantiate(TerrainStripPrefab, new Vector3(0, 0, _lastStripPos), Quaternion.identity);
         _stripPool.Add(_lastStripPos, tempStrip.GetComponent<TerrainStrip>());
 
+        //In the future we not doing this randomly or at all; the TS will just grab the prop based on terrain type
         int randProp = Random.Range(0, TerrainProps.Count);
 
         //Want the first 5 strips to be all grass strips
@@ -86,8 +88,10 @@ public class TerrainStripFactory : MonoBehaviour
         }
         
         TerrainInfo newTerrainInfo = CreateWeightedTerrainInfo();
-        if (newTerrainInfo.type == TerrainType.Grass || newTerrainInfo.type == TerrainType.River)
-            _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[randProp]);
+        if (newTerrainInfo.type == TerrainType.Grass)
+            _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[0]);
+        else if (newTerrainInfo.type == TerrainType.River)
+            _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1]);
         else
             _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo);
         _lastStripPos++;
@@ -101,14 +105,16 @@ public class TerrainStripFactory : MonoBehaviour
             TerrainStrip unusedStrip = _stripPool[stripKey];
             unusedStrip.gameObject.transform.position = new Vector3(0, 0, _lastStripPos);
 
+            //In the future we not doing this randomly or at all; the TS will just grab the prop based on terrain type
             int randProp = Random.Range(0, TerrainProps.Count);
             int riverPropChance = Random.Range(1, 5);
 
             TerrainInfo newTerrainInfo = CreateWeightedTerrainInfo();
             //Ugly ugly code; need a better way of defining rules for terrain strips
-            if (newTerrainInfo.type == TerrainType.Grass 
-                || (newTerrainInfo.type == TerrainType.River && riverPropChance == 1))
-                unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[randProp]);
+            if (newTerrainInfo.type == TerrainType.Grass)
+                unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[0]);
+            else if (newTerrainInfo.type == TerrainType.River && riverPropChance == 1)
+                unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1]);
             else
                 unusedStrip.ReassignTerrainStrip(newTerrainInfo);
 
@@ -235,7 +241,8 @@ public class TerrainStripFactory : MonoBehaviour
         Cell temp = _stripPool[currentStrip].GetCell(direction);
         return temp.gridPos;
     }
-
+    
+    //Modify this to grab prop based on terrain type; will need to adjust instantiation code too
     public static GameObject GetUsablePropFromPool(Prop prop)
     {
         List<GameObject> propPool = _poolDictionary[prop.propTerrain];
@@ -246,7 +253,7 @@ public class TerrainStripFactory : MonoBehaviour
                 return propPool[i];
             }
         }
-        GameObject newPropRef = Instantiate(prop.propPrefab, Vector3.zero, Quaternion.identity);
+        GameObject newPropRef = Instantiate(prop.propPrefab, Vector3.zero, prop.propPrefab.transform.rotation);
         
         propPool.Add(newPropRef);
 
