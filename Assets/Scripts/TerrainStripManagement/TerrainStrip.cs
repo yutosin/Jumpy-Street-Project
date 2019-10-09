@@ -39,7 +39,7 @@ public class TerrainStrip : MonoBehaviour
     private static int CurrentCell
     {
         get { return _currentCell; }
-        set { _currentCell =  Mathf.Clamp(value, 0, 19); }
+        set { _currentCell =  Mathf.Clamp(value, 6, 13); }
     }
 
     public int zPosKey;
@@ -96,7 +96,13 @@ public class TerrainStrip : MonoBehaviour
         for (int i = 0; i < _cells.Capacity; i++)
         {
             // Chance of prop beign spawned in a cell
-            int objectChance = Random.Range(1, 6); //balance this
+            int objectChance;
+            
+            //Also very ugly code; need a better way of setting prop rules for strip
+            if (i < 6 || i > 13)
+                objectChance = Random.Range(1, 3); //balance this
+            else
+                objectChance = Random.Range(1, 7);
             
             Cell tempCell = new Cell();
             tempCell.gridPos = new Vector3(xPosBase + (i * xPosIncrement), 0, zPos);

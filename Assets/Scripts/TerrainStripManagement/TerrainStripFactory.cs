@@ -80,7 +80,7 @@ public class TerrainStripFactory : MonoBehaviour
         //Want the first 5 strips to be all grass strips
         if (_stripPool.Count < 6)
         {
-            _stripPool[_lastStripPos].SetupTerrainStrip(TerrainInfos[0]);
+            _stripPool[_lastStripPos].SetupTerrainStrip(TerrainInfos[0], TerrainProps[0]);
             _lastStripPos++;
             return;
         }
@@ -102,9 +102,12 @@ public class TerrainStripFactory : MonoBehaviour
             unusedStrip.gameObject.transform.position = new Vector3(0, 0, _lastStripPos);
 
             int randProp = Random.Range(0, TerrainProps.Count);
+            int riverPropChance = Random.Range(1, 5);
 
             TerrainInfo newTerrainInfo = CreateWeightedTerrainInfo();
-            if (newTerrainInfo.type == TerrainType.Grass || newTerrainInfo.type == TerrainType.River)
+            //Ugly ugly code; need a better way of defining rules for terrain strips
+            if (newTerrainInfo.type == TerrainType.Grass 
+                || (newTerrainInfo.type == TerrainType.River && riverPropChance == 1))
                 unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[randProp]);
             else
                 unusedStrip.ReassignTerrainStrip(newTerrainInfo);
