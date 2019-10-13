@@ -18,6 +18,13 @@ public struct Prop
 
 public class TerrainStripFactory : MonoBehaviour
 {
+    private static TerrainStripFactory _sharedInstance;
+    public static TerrainStripFactory SharedInstance
+    {
+        get { return _sharedInstance; }
+    }
+    
+    
     private Dictionary<int, TerrainStrip> _stripPool;
     private Stack<int> _unusedStrips;
     private static Dictionary<TerrainType, List<GameObject>> _poolDictionary;
@@ -36,12 +43,25 @@ public class TerrainStripFactory : MonoBehaviour
     public List<Prop> TerrainProps; //The prop that can be placed in TerrainStrips
     public GameObject TerrainStripPrefab;
     public int NumStrips;
-    
+    public List<MovableProp> movablePropPefabs;
+
+    private void Awake()
+    {
+        if (_sharedInstance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+		
+        _sharedInstance = this;
+    }
+
     // Start is called before the first frame update
     void Start()
     { 
         _poolDictionary = new Dictionary<TerrainType, List<GameObject>>();
         CreatePropPools();
+        MovableStripManager.CreateManagerPools();
         
         _stripPool = new Dictionary<int, TerrainStrip>(NumStrips);
         for (int i = 0; i < NumStrips; i++)
@@ -91,7 +111,17 @@ public class TerrainStripFactory : MonoBehaviour
         if (newTerrainInfo.type == TerrainType.Grass)
             _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[0]);
         else if (newTerrainInfo.type == TerrainType.River)
-            _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1]);
+        {
+            float randValue = Random.value;
+            if (randValue <= .85f)
+                _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1], true);
+            else
+                _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1]);
+        }
+        else if (newTerrainInfo.type == TerrainType.Road)
+        {
+            _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, default(Prop), true);
+        }
         else
             _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo);
         _lastStripPos++;
@@ -106,15 +136,24 @@ public class TerrainStripFactory : MonoBehaviour
             unusedStrip.gameObject.transform.position = new Vector3(0, 0, _lastStripPos);
 
             //In the future we not doing this randomly or at all; the TS will just grab the prop based on terrain type
-            int randProp = Random.Range(0, TerrainProps.Count);
-            int riverPropChance = Random.Range(1, 5);
+            //int riverPropChance = Random.Range(1, 5);
 
             TerrainInfo newTerrainInfo = CreateWeightedTerrainInfo();
             //Ugly ugly code; need a better way of defining rules for terrain strips
             if (newTerrainInfo.type == TerrainType.Grass)
                 unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[0]);
-            else if (newTerrainInfo.type == TerrainType.River && riverPropChance == 1)
-                unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1]);
+            else if (newTerrainInfo.type == TerrainType.River)
+            {
+                float randValue = Random.value;
+                if (randValue <= .85f)
+                    unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1], true);
+                else
+                    unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1]);
+            }
+            else if (newTerrainInfo.type == TerrainType.Road)
+            {
+                unusedStrip.ReassignTerrainStrip(newTerrainInfo, default(Prop), true);
+            }
             else
                 unusedStrip.ReassignTerrainStrip(newTerrainInfo);
 

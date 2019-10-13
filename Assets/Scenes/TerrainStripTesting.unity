@@ -546,6 +546,11 @@ MonoBehaviour:
   TerrainStripPrefab: {fileID: 6158682865970832215, guid: 9dffd366d6fd0492d8c8640c338110b0,
     type: 3}
   NumStrips: 30
+  movablePropPefabs:
+  - {fileID: -6427803445907213658, guid: bcf04c37521fb4befbd879ac7c0f0f58, type: 3}
+  - {fileID: -4512062024041374221, guid: f4baa1bac18fe4af3acc35d80d92c2fd, type: 3}
+  - {fileID: -6246471475513978270, guid: 2c578440e35d649aabcdb9b16288d161, type: 3}
+  - {fileID: -6219045332966448832, guid: bb3fec7f54ecb4381a1ffcd09b06d1e3, type: 3}
 --- !u!4 &973316027
 Transform:
   m_ObjectHideFlags: 0

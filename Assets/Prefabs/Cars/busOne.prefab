@@ -703,6 +703,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8272042181262065313}
   - component: {fileID: 4014543761185281465}
+  - component: {fileID: -4512062024041374221}
   m_Layer: 0
   m_Name: busOne
   m_TagString: Untagged
@@ -761,6 +762,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.58741677, y: 1.8784068, z: 0.5329939}
   m_Center: {x: -0.0027711391, y: 0.009844303, z: 0.036180735}
+--- !u!114 &-4512062024041374221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4942537114026429618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae457a2e33c99441195a2951b95b1cd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 0
 --- !u!1 &5024390335695962740
 GameObject:
   m_ObjectHideFlags: 0
