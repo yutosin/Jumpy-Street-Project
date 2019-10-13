@@ -124,13 +124,33 @@ public class TerrainStrip : MonoBehaviour
                 
                 tempCell.accessible = cellProp.propAccessibility;
             }
+            else if (Type == TerrainType.River)
+                tempCell.accessible = false;
             else
-            {
                 tempCell.accessible = true;
-            }
 
             _cells.Add(tempCell);
         }
+    }
+
+    public Cell GetNearestCell(Vector3 point)
+    {
+        Cell nearestCell = default(Cell);
+        for (int i = 0; i < _cells.Count; i++)
+        {
+            if (point.x > _cells[i].gridPos.x && point.x < _cells[i].gridPos.x + .5f
+                || point.x < _cells[i].gridPos.x && point.x > _cells[i].gridPos.x - .5f
+                || point.x == _cells[i].gridPos.x)
+            {
+                nearestCell = _cells[i];
+                if (_cells[i].accessible)
+                {
+                    CurrentCell = i;
+                }
+            }
+        }
+
+        return nearestCell;
     }
 
     public Cell GetCell(MoveDirection direction)
@@ -175,7 +195,16 @@ public class TerrainStrip : MonoBehaviour
                 StripInactive.Invoke(this);
         }
     }
-    
+
+    private void OnDrawGizmos()
+    {
+        for (int i = 0; i < _cells.Count; i++)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(_cells[i].gridPos, Vector3.one);
+        }
+    }
+
     private void Update()
     {
         BoundsCheck();

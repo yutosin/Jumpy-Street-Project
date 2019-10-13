@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public struct Prop
@@ -255,6 +256,60 @@ public class TerrainStripFactory : MonoBehaviour
         _unusedStrips.Push(strip.zPosKey);
         AddTerrainStrip();
     }
+    
+    private Vector3 GetNextRiverPosition(MoveDirection direction)
+    {
+        PlayerMovement.isInRiver = true;
+        Transform playerTransform = PlayerMovement.playerObject.transform;
+        Vector3 checkPoint = new Vector3(playerTransform.position.x, 
+            playerTransform.position.y,
+            currentStrip);
+        Cell nextCell = _stripPool[currentStrip].GetNearestCell(checkPoint);
+        if (_stripPool[currentStrip].Type != TerrainType.River && nextCell.accessible)
+        {
+            PlayerMovement.isInRiver = false;
+            playerTransform.parent = null;
+            return nextCell.gridPos;
+        }
+
+        if (nextCell.accessible)
+        {
+            playerTransform.parent = null;
+            return nextCell.gridPos;
+        }   
+
+        LayerMask mask = LayerMask.GetMask("Log");
+        Collider[] colliders = Physics.OverlapBox(playerTransform.position, Vector3.one, Quaternion.identity, mask);
+        if (colliders.Length == 0)
+        {
+//            Destroy(PlayerMovement.playerObject);
+            return nextCell.gridPos;
+        }
+
+        Vector3 logPos = Vector3.zero;
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if ((int)colliders[i].transform.position.z == currentStrip)
+            {
+                logPos = colliders[i].transform.position;
+                PlayerMovement.playerObject.transform.parent = colliders[i].transform;
+                break;
+            }
+        }
+
+        if (logPos == Vector3.zero)
+            return nextCell.gridPos;
+        
+        
+        //Have to clean this up; something is wrong with my positioning logic, should be able to just use playerPos
+        if (direction == MoveDirection.LEFT && playerTransform.position.x > logPos.x)
+            return new Vector3(logPos.x - .5f, 1.5f, logPos.z);
+        if (direction == MoveDirection.RIGHT && playerTransform.position.x < logPos.x)
+            return new Vector3(logPos.x + .5f, 1.5f, logPos.z);
+        if (logPos.x > nextCell.gridPos.x)
+            return new Vector3(logPos.x - .5f, 1.5f, logPos.z);
+        return new Vector3(logPos.x + .5f, 1.5f, logPos.z);
+    }
 
     public Vector3 GetNextPosition(MoveDirection direction)
     {
@@ -262,14 +317,20 @@ public class TerrainStripFactory : MonoBehaviour
         {
             case MoveDirection.UP:
                 ++currentStrip;
-                bool accessible = _stripPool[currentStrip].GetCell(direction).accessible;
+                if (_stripPool[currentStrip].Type == TerrainType.River || PlayerMovement.isInRiver)
+                    return GetNextRiverPosition(direction);
+                Cell nextCell = _stripPool[currentStrip].GetCell(direction);
+                bool accessible = nextCell.accessible;
                 if (!accessible)
                     --currentStrip;
 
                 break;
             case MoveDirection.DOWN:
                 --currentStrip;
-                accessible = _stripPool[currentStrip].GetCell(direction).accessible;
+                if (_stripPool[currentStrip].Type == TerrainType.River || PlayerMovement.isInRiver)
+                    return GetNextRiverPosition(direction);
+                nextCell = _stripPool[currentStrip].GetCell(direction);
+                accessible = nextCell.accessible;
                 if (!accessible)
                     ++currentStrip;
 
@@ -277,6 +338,8 @@ public class TerrainStripFactory : MonoBehaviour
             default:
                 break;
         }
+        if (_stripPool[currentStrip].Type == TerrainType.River || PlayerMovement.isInRiver)
+            return GetNextRiverPosition(direction);
         Cell temp = _stripPool[currentStrip].GetCell(direction);
         return temp.gridPos;
     }

@@ -89,7 +89,7 @@ public class MovableStripManager
         for (int i = 0; i < numProps; i++)
         {
             MovableProp tempMovableProp = GetUsablePropFromPool(MovablePropType.LOG);
-            tempMovableProp.transform.position = new Vector3( (-9f * randomSign) + (i * propOffset * randomSign), 0.7f, zPos);
+            tempMovableProp.transform.position = new Vector3( (-9f * randomSign) + (i * propOffset * randomSign), 0.5f, zPos);
             tempMovableProp.transform.rotation = 
                 Quaternion.Euler(tempMovableProp.transform.eulerAngles.x, 90 * randomSign, 0);
             tempMovableProp.Speed = speed; 

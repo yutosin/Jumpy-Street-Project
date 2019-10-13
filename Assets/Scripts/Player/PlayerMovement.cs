@@ -11,8 +11,14 @@ public enum MoveDirection
 
 public class PlayerMovement : MonoBehaviour
 {
-    public TerrainStripFactory stripManager;
-    
+    public static GameObject playerObject;
+    public static bool isInRiver = false;
+
+    private void Awake()
+    {
+        playerObject = gameObject;
+    }
+
     void LateUpdate()
     {
         Vector3 nextPosition = HandleMovement();
@@ -52,19 +58,19 @@ public class PlayerMovement : MonoBehaviour
         //also might want to use getAxis code
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.UP);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.UP);
         }
         if (Input.GetKeyDown(KeyCode.S ) || Input.GetKeyDown(KeyCode.DownArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.DOWN);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.DOWN);
         }
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.LEFT);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.LEFT);
         }
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.RIGHT);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.RIGHT);
         }
         
         return Vector3.zero;

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1691989466392179016}
   - component: {fileID: 5909166613254085200}
   - component: {fileID: -6427803445907213658}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: logVehicle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -85,8 +85,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2687164212016122831}
   m_LocalRotation: {x: -0.000000053385083, y: 0.7071068, z: -0.7071067, w: 0.000000053385072}
-  m_LocalPosition: {x: -0.044118237, y: 1.0371902, z: -0.1641441}
-  m_LocalScale: {x: 0.2690219, y: 0.2690219, z: 0.15710708}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.15}
   m_Children: []
   m_Father: {fileID: 1691989466392179016}
   m_RootOrder: 0
