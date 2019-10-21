@@ -705,7 +705,7 @@ GameObject:
   - component: {fileID: 4014543761185281465}
   m_Layer: 0
   m_Name: busOne
-  m_TagString: Untagged
+  m_TagString: Vehicle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

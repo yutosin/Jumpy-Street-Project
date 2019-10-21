@@ -17,7 +17,7 @@ public class VehicleCollisions : MonoBehaviour
         if(collision.gameObject.tag == "Vehicle")
             //holds the code that tells the game to reset the scene once the player hits or gets hit by a vehicle
         {
-
+            SceneManager.LoadScene("TerrainStripTesting");
         }
 
     }
