@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/HelpScreen.unity
     guid: bd392871253ecf846987f473f947bcf8
+  - enabled: 1
+    path: Assets/Scenes/TerrainStripTesting.unity
+    guid: 9bb49436e1b0e4341a8d44b276c19080
   m_configObjects: {}

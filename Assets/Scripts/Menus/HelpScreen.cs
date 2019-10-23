@@ -17,7 +17,7 @@ public class HelpScreen : MonoBehaviour
 
     public void OnReturnButtonClick()
     {
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("TitleScreen");
     }
 
     public void OnQuitButtonClick()
