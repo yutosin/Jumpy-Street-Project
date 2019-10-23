@@ -17,6 +17,7 @@ public class MovableStripManager
     private TerrainType _type;
     private List<MovableProp> _movableProps;
     private float zPos = 0;
+    private float _logDirection = 0;
     private bool _isActive = false;
 
     public bool IsActive
@@ -82,19 +83,20 @@ public class MovableStripManager
     {
         //All these values need balancing
         float speed = Random.Range(1, 3);
-        int propOffset = Random.Range(4, 7);
+        int propOffset = Random.Range(4, 6);
         int numProps = Random.Range(3, 5);
-        int randomSign = Random.Range(0, 2) * 2 - 1;
+        //int randomSign = Random.Range(0, 2) * 2 - 1;
 
         for (int i = 0; i < numProps; i++)
         {
             MovableProp tempMovableProp = GetUsablePropFromPool(MovablePropType.LOG);
-            tempMovableProp.transform.position = new Vector3( (-9f * randomSign) + (i * propOffset * randomSign), 0.5f, zPos);
+            tempMovableProp.transform.position = new Vector3( (-9f * _logDirection) + (i * propOffset * _logDirection), 0.5f, zPos);
             tempMovableProp.transform.rotation = 
-                Quaternion.Euler(tempMovableProp.transform.eulerAngles.x, 90 * randomSign, 0);
+                Quaternion.Euler(tempMovableProp.transform.eulerAngles.x, 90 * _logDirection, 0);
             tempMovableProp.Speed = speed; 
-            tempMovableProp.Direction = new Vector3(randomSign, 0, 0);
+            tempMovableProp.Direction = new Vector3(_logDirection, 0, 0);
             tempMovableProp.gameObject.SetActive(true);
+            tempMovableProp.Type = MovablePropType.LOG;
             
             _movableProps.Add(tempMovableProp);
         }
@@ -104,8 +106,8 @@ public class MovableStripManager
     private void SetupRoadType()
     {
         //All these values need balancing
-        float speed = Random.Range(1, 4);
-        int propOffset = Random.Range(4, 7);
+        float speed = Random.Range(1.5f, 4);
+        int propOffset = Random.Range(3, 6);
         int numProps = Random.Range(3, 5);
         int randomSign = Random.Range(0, 2) * 2 - 1;
         int carChoice = Random.Range(0, _usableRoadTypes.Length);
@@ -124,6 +126,11 @@ public class MovableStripManager
         }
     }
 
+//    private void SetupTrainType()
+//    {
+//        
+//    }
+
     public void ReturnToInactive()
     {
         for (int i = 0; i < _movableProps.Count; i++)
@@ -136,10 +143,11 @@ public class MovableStripManager
         _isActive = false;
     }
 
-    public void SetupManager(TerrainType type, float zPosition)
+    public void SetupManager(TerrainType type, float zPosition, float direction = 0)
     {
         _type = type;
         zPos = zPosition;
+        _logDirection = direction;
         _isActive = true;
         
         _movableProps = new List<MovableProp>(5);

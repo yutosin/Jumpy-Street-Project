@@ -30,8 +30,8 @@ public class TerrainStripFactory : MonoBehaviour
     private Stack<int> _unusedStrips;
     private static Dictionary<TerrainType, List<GameObject>> _poolDictionary;
     private int _currentStrip; //do not access directly!! use currentStrip
-    private int _lastStripPos = -5;
-    private int _sameStripCount = 0;
+    private int _lastStripPos;
+    private int _sameStripCount;
     
     private int currentStrip
     {
@@ -61,6 +61,9 @@ public class TerrainStripFactory : MonoBehaviour
     void Start()
     { 
         _poolDictionary = new Dictionary<TerrainType, List<GameObject>>();
+        _lastStripPos = -5;
+        _sameStripCount = 0;
+        
         CreatePropPools();
         MovableStripManager.CreateManagerPools();
         
@@ -114,10 +117,13 @@ public class TerrainStripFactory : MonoBehaviour
         else if (newTerrainInfo.type == TerrainType.River)
         {
             float randValue = Random.value;
-            if (randValue <= .85f)
+            if (randValue <= .75f)
                 _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1], true);
-            else
+            else if (_stripPool[_lastStripPos - 1].Type != TerrainType.River
+                || (_stripPool[_lastStripPos - 1].Type == TerrainType.River && !_stripPool[_lastStripPos - 1].IsMovable))
                 _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1]);
+            else
+                _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1], true);
         }
         else if (newTerrainInfo.type == TerrainType.Road)
         {
@@ -146,10 +152,17 @@ public class TerrainStripFactory : MonoBehaviour
             else if (newTerrainInfo.type == TerrainType.River)
             {
                 float randValue = Random.value;
-                if (randValue <= .85f)
+                if (randValue <= .75f)
                     unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1], true);
-                else
+                else if (_stripPool[_lastStripPos - 1].Type != TerrainType.River
+                         || (_stripPool[_lastStripPos - 1].Type == TerrainType.River && !_stripPool[_lastStripPos - 1].IsMovable))
                     unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1]);
+//                if (randValue <= .85f)
+//                    unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1], true);
+//                else if (!_stripPool[_lastStripPos].IsMovable)
+//                    unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1]);
+                else
+                    unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1], true);
             }
             else if (newTerrainInfo.type == TerrainType.Road)
             {
@@ -259,9 +272,13 @@ public class TerrainStripFactory : MonoBehaviour
     
     private Vector3 GetNextRiverPosition(MoveDirection direction)
     {
+        //Modify checkpoint to consider the movement direction
         PlayerMovement.isInRiver = true;
         Transform playerTransform = PlayerMovement.playerObject.transform;
-        Vector3 checkPoint = new Vector3(playerTransform.position.x, 
+        float horizontalDistanceCheck = 0f;
+        horizontalDistanceCheck = (direction == MoveDirection.LEFT) ? -1.0f : horizontalDistanceCheck;
+        horizontalDistanceCheck = (direction == MoveDirection.RIGHT) ? 1.0f : horizontalDistanceCheck;
+        Vector3 checkPoint = new Vector3(playerTransform.position.x + horizontalDistanceCheck, 
             playerTransform.position.y,
             currentStrip);
         Cell nextCell = _stripPool[currentStrip].GetNearestCell(checkPoint);
@@ -279,10 +296,11 @@ public class TerrainStripFactory : MonoBehaviour
         }   
 
         LayerMask mask = LayerMask.GetMask("Log");
-        Collider[] colliders = Physics.OverlapBox(playerTransform.position, Vector3.one, Quaternion.identity, mask);
+        Vector3 overlapCube = new Vector3(.5f, .75f, .75f);
+        Collider[] colliders = Physics.OverlapBox(checkPoint, overlapCube, Quaternion.identity, mask);
         if (colliders.Length == 0)
         {
-//            Destroy(PlayerMovement.playerObject);
+            Destroy(PlayerMovement.playerObject);
             return nextCell.gridPos;
         }
 
@@ -298,9 +316,12 @@ public class TerrainStripFactory : MonoBehaviour
         }
 
         if (logPos == Vector3.zero)
+        {
+            Destroy(PlayerMovement.playerObject);
             return nextCell.gridPos;
-        
-        
+        }
+
+
         //Have to clean this up; something is wrong with my positioning logic, should be able to just use playerPos
         if (direction == MoveDirection.LEFT && playerTransform.position.x > logPos.x)
             return new Vector3(logPos.x - .5f, 1.5f, logPos.z);
@@ -362,10 +383,8 @@ public class TerrainStripFactory : MonoBehaviour
         return newPropRef;
     }
 
-    /*TO DO:
-        -will terrain strip factory essentially be terrain strip manager? or should i separate creation and logic?
-        -continuous strip generation
-        -weighted random; heavier on road and river, lighter on grass, lightest on train
-        -create strip managers?
-     */
+    private void OnDestroy()
+    {
+        TerrainStrip.StripInactive -= OnStripInactive;
+    }
 }

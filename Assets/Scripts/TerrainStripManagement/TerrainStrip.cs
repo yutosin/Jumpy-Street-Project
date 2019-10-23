@@ -34,6 +34,7 @@ public class TerrainStrip : MonoBehaviour
     private List<GameObject> _props;
     private List<Prop> _testProps;
     private MovableStripManager _movableStripManager;
+    private static float _lastLogDirection = -1.0f;
     
     private static int _currentCell = 11;
 
@@ -44,6 +45,7 @@ public class TerrainStrip : MonoBehaviour
     }
 
     public int zPosKey;
+    public bool IsMovable = false;
     
     public delegate void OnStripInactive(TerrainStrip strip);
     
@@ -61,8 +63,18 @@ public class TerrainStrip : MonoBehaviour
         zPosKey = (int)transform.position.z;
         SetTerrainInfo(terrainInfo);
         _movableStripManager = new MovableStripManager();
+        IsMovable = movable;
         if (movable)
-            _movableStripManager.SetupManager(Type, zPosKey);
+        {
+            if (Type == TerrainType.River)
+            {
+                _movableStripManager.SetupManager(Type, zPosKey, _lastLogDirection);
+                _lastLogDirection = _lastLogDirection * -1;
+            }
+            else
+                _movableStripManager.SetupManager(Type, zPosKey);
+        }
+
         if (prop.propPrefab != null)
         {
             CreateCells(prop);
@@ -75,8 +87,17 @@ public class TerrainStrip : MonoBehaviour
     {
         zPosKey = (int)transform.position.z;
         SetTerrainInfo(terrainInfo);
+        IsMovable = movable;
         if (movable)
-            _movableStripManager.SetupManager(Type, zPosKey);
+        {
+            if (Type == TerrainType.River)
+            {
+                _movableStripManager.SetupManager(Type, zPosKey, _lastLogDirection);
+                _lastLogDirection = _lastLogDirection * -1;
+            }
+            else
+                _movableStripManager.SetupManager(Type, zPosKey);
+        }
         if (prop.propPrefab != null)
             CreateCells(prop);
         else
@@ -92,6 +113,15 @@ public class TerrainStrip : MonoBehaviour
             _terrainInfo = terrainInfo;
             rend.material = _terrainInfo.mat;
         }
+    }
+
+    private Prop PlaceProp(Prop prop, Vector3 placement)
+    {
+        Prop cellProp = prop;
+        cellProp.gameObject = TerrainStripFactory.GetUsablePropFromPool(prop);
+        cellProp.gameObject.transform.position = new Vector3(placement.x, 1 + prop.yOffset, placement.z);
+        cellProp.gameObject.SetActive(true);
+        return cellProp;
     }
 
     private void CreateCells(Prop prop = new Prop())
@@ -113,12 +143,9 @@ public class TerrainStrip : MonoBehaviour
             Cell tempCell = new Cell();
             tempCell.gridPos = new Vector3(xPosBase + (i * xPosIncrement), 0, zPos);
             
-            if (!_movableStripManager.IsActive && objectChance == 1 && prop.propPrefab != null)
+            if (!IsMovable && objectChance == 1 && prop.propPrefab != null)
             {
-                Prop cellProp = prop;
-                cellProp.gameObject = TerrainStripFactory.GetUsablePropFromPool(prop);
-                cellProp.gameObject.transform.position = new Vector3(tempCell.gridPos.x, 1 + prop.yOffset, tempCell.gridPos.z);
-                cellProp.gameObject.SetActive(true);
+                Prop cellProp = PlaceProp(prop, tempCell.gridPos);
                 
                 _testProps.Add(cellProp);
                 
@@ -130,6 +157,19 @@ public class TerrainStrip : MonoBehaviour
                 tempCell.accessible = true;
 
             _cells.Add(tempCell);
+        }
+
+        if (!IsMovable && _testProps.Count < 1 && prop.propPrefab != null)
+        {
+            int randomCellNum = Random.Range(6, 13);
+            Cell tempCell = _cells[randomCellNum];
+
+            Prop cellProp = PlaceProp(prop, tempCell.gridPos);
+            _testProps.Add(cellProp);
+                
+            tempCell.accessible = cellProp.propAccessibility;
+
+            _cells[randomCellNum] = tempCell;
         }
     }
 
@@ -188,7 +228,7 @@ public class TerrainStrip : MonoBehaviour
             gameObject.SetActive(false);
             _testProps.Clear();
             _cells.Clear();
-            if (_movableStripManager.IsActive)
+            if (IsMovable)
                 _movableStripManager.ReturnToInactive();
             
             if (StripInactive != null)

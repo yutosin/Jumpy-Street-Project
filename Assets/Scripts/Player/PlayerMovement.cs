@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 public enum MoveDirection
 {
     UP,
@@ -17,6 +19,14 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         playerObject = gameObject;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
 
     void LateUpdate()
