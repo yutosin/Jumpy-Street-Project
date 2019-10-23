@@ -120,7 +120,7 @@ public class TerrainStripFactory : MonoBehaviour
             if (randValue <= .75f)
                 _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1], true);
             else if (_stripPool[_lastStripPos - 1].Type != TerrainType.River
-                || (_stripPool[_lastStripPos - 1].Type == TerrainType.River && !_stripPool[_lastStripPos - 1].IsMovable))
+                || (_stripPool[_lastStripPos - 1].Type == TerrainType.River && _stripPool[_lastStripPos - 1].IsMovable))
                 _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1]);
             else
                 _stripPool[_lastStripPos].SetupTerrainStrip(newTerrainInfo, TerrainProps[1], true);
@@ -155,12 +155,8 @@ public class TerrainStripFactory : MonoBehaviour
                 if (randValue <= .75f)
                     unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1], true);
                 else if (_stripPool[_lastStripPos - 1].Type != TerrainType.River
-                         || (_stripPool[_lastStripPos - 1].Type == TerrainType.River && !_stripPool[_lastStripPos - 1].IsMovable))
+                         || (_stripPool[_lastStripPos - 1].Type == TerrainType.River && _stripPool[_lastStripPos - 1].IsMovable))
                     unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1]);
-//                if (randValue <= .85f)
-//                    unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1], true);
-//                else if (!_stripPool[_lastStripPos].IsMovable)
-//                    unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1]);
                 else
                     unusedStrip.ReassignTerrainStrip(newTerrainInfo, TerrainProps[1], true);
             }
@@ -200,7 +196,6 @@ public class TerrainStripFactory : MonoBehaviour
                     }
                     else
                     {
-                        //randTerrain = Random.Range(1, TerrainInfos.Count);
                         randTerrain = RandomRangeExcept(0, TerrainInfos.Count, 0);
                         _sameStripCount = 0;
                     }
@@ -287,6 +282,15 @@ public class TerrainStripFactory : MonoBehaviour
             PlayerMovement.isInRiver = false;
             playerTransform.parent = null;
             return nextCell.gridPos;
+        }
+        
+        if (_stripPool[currentStrip].Type != TerrainType.River && !nextCell.accessible)
+        {
+            if (direction == MoveDirection.UP)
+                --currentStrip;
+            else
+                ++currentStrip;
+            return playerTransform.position;
         }
 
         if (nextCell.accessible)
