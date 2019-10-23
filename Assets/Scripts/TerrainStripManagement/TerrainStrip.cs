@@ -32,19 +32,21 @@ public class TerrainStrip : MonoBehaviour
     private List<Cell> _cells;
     private TerrainInfo _terrainInfo;
     private List<GameObject> _props;
+    private List<Prop> _testProps;
     
     private static int _currentCell = 11;
 
     private static int CurrentCell
     {
         get { return _currentCell; }
-        set { _currentCell =  Mathf.Clamp(value, 0, 19); }
+        set { _currentCell =  Mathf.Clamp(value, 6, 13); }
     }
 
-    public delegate void OnStripDestroy(TerrainStrip strip);
+    public int zPosKey;
     
-    //Event used by TerrainStripFactory to know when to remove a TerrainStrip from the TerrainStrip master list
-    public static event OnStripDestroy StripDestroyed;
+    public delegate void OnStripInactive(TerrainStrip strip);
+    
+    public static event OnStripInactive StripInactive;
 
     public TerrainType Type
     {
@@ -54,7 +56,8 @@ public class TerrainStrip : MonoBehaviour
     public void SetupTerrainStrip(TerrainInfo terrainInfo, Prop prop = new Prop())
     {
         _cells = new List<Cell>(20); //All strips contain 20 cells corresponding to their width
-        _props = new List<GameObject>(20); 
+        _testProps = new List<Prop>(20);
+        zPosKey = (int)transform.position.z;
         SetTerrainInfo(terrainInfo);
         if (prop.propPrefab != null)
         {
@@ -62,6 +65,17 @@ public class TerrainStrip : MonoBehaviour
             return;
         }
         CreateCells();
+    }
+
+    public void ReassignTerrainStrip(TerrainInfo terrainInfo, Prop prop = new Prop())
+    {
+        SetTerrainInfo(terrainInfo);
+        if (prop.propPrefab != null)
+            CreateCells(prop);
+        else
+            CreateCells();
+        gameObject.SetActive(true);
+        zPosKey = (int)transform.position.z;
     }
 
     private void SetTerrainInfo(TerrainInfo terrainInfo)
@@ -82,23 +96,33 @@ public class TerrainStrip : MonoBehaviour
         for (int i = 0; i < _cells.Capacity; i++)
         {
             // Chance of prop beign spawned in a cell
-            int objectChance = Random.Range(1, 4); //balance this
+            int objectChance;
+            
+            //Also very ugly code; need a better way of setting prop rules for strip
+            if (i < 6 || i > 13)
+                objectChance = Random.Range(1, 3); //balance this
+            else
+                objectChance = Random.Range(1, 7);
             
             Cell tempCell = new Cell();
             tempCell.gridPos = new Vector3(xPosBase + (i * xPosIncrement), 0, zPos);
             
             if (objectChance == 1 && prop.propPrefab != null)
             {
-                GameObject newProp = Instantiate(prop.propPrefab, 
-                    new Vector3(tempCell.gridPos.x, 1, tempCell.gridPos.z), Quaternion.identity);
-                _props.Add(newProp);
-                tempCell.accessible = prop.propAccessibility;
+                Prop cellProp = prop;
+                cellProp.gameObject = TerrainStripFactory.GetUsablePropFromPool(prop);
+                cellProp.gameObject.transform.position = new Vector3(tempCell.gridPos.x, 1 + prop.yOffset, tempCell.gridPos.z);
+                cellProp.gameObject.SetActive(true);
+                
+                _testProps.Add(cellProp);
+                
+                tempCell.accessible = cellProp.propAccessibility;
             }
             else
             {
                 tempCell.accessible = true;
             }
-            
+
             _cells.Add(tempCell);
         }
     }
@@ -131,13 +155,16 @@ public class TerrainStrip : MonoBehaviour
         Vector3 viewPos = CameraManager.Cam.WorldToViewportPoint(transform.position);
         if (viewPos.x < -0.2 || viewPos.y < -0.2)
         {
-            if (StripDestroyed != null)
-                StripDestroyed.Invoke(this);
-            foreach (var prop in _props)
+            for (int i = 0; i < _testProps.Count; i++)
             {
-                Destroy(prop.gameObject);
+                _testProps[i].gameObject.SetActive(false);
             }
-            Destroy(gameObject);
+            gameObject.SetActive(false);
+            _testProps.Clear();
+            _cells.Clear();
+            
+            if (StripInactive != null)
+                StripInactive.Invoke(this);
         }
     }
     
