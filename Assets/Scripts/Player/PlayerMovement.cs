@@ -98,4 +98,9 @@ public class PlayerMovement : MonoBehaviour
         }
 
     }
+
+    private void OnDestroy()
+    {
+        GameScripts.SharedInstance.ScoreManager.UpdateHighScore();
+    }
 }

@@ -7,7 +7,7 @@ public class ScoreManager : MonoBehaviour
 {
     public Text ScoreText, HighScoreText;
     
-    private static int HighScore, Score;
+    private int HighScore, Score;
     
 
 
@@ -30,6 +30,13 @@ public class ScoreManager : MonoBehaviour
 
     public void UpdateHighScore()
     {
-        
+        HighScoreText.gameObject.SetActive(true);
+        int storedHighScore = PlayerPrefs.GetInt("HighScore",0);
+        if(Score > storedHighScore)
+        {
+            PlayerPrefs.SetInt("HighScore", Score);
+            storedHighScore = Score;
+        }
+        HighScoreText.text = storedHighScore.ToString();
     }
 }
