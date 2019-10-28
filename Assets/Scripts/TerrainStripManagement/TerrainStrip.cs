@@ -212,7 +212,12 @@ public class TerrainStrip : MonoBehaviour
         {
             case MoveDirection.UP:
                 if (zPosKey > 0)
+                {
+                    if (!Visited)
+                        ScoreManager.IncrementScore(); 
                     Visited = true;
+                }
+                    
                 break;
             case MoveDirection.DOWN:
                 break;
