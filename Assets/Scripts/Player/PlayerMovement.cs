@@ -85,4 +85,16 @@ public class PlayerMovement : MonoBehaviour
         
         return Vector3.zero;
     }
+
+    private void OnTriggerEnter(Collider collision)
+    //Handles the actions involving the player and the different in-game vehicles
+    {
+        Debug.Log("Collision Detected");
+        if (collision.gameObject.tag == "Vehicle")
+        //holds the code that tells the game to reset the scene once the player hits or gets hit by a vehicle
+        {
+            Destroy(gameObject);
+        }
+
+    }
 }
