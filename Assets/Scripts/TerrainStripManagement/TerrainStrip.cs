@@ -214,7 +214,7 @@ public class TerrainStrip : MonoBehaviour
                 if (zPosKey > 0)
                 {
                     if (!Visited)
-                        ScoreManager.IncrementScore(); 
+                        GameScripts.SharedInstance.ScoreManager.IncrementScore(); 
                     Visited = true;
                 }
                     

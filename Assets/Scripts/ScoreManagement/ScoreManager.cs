@@ -22,20 +22,14 @@ public class ScoreManager : MonoBehaviour
 
     }
 
-    public static void IncrementScore()
+    public void IncrementScore()
     {
         Score++;
-        
-    }
-
-    public static void UpdateHighScore()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
         ScoreText.text = Score.ToString();
+    }
+
+    public void UpdateHighScore()
+    {
+        
     }
 }
