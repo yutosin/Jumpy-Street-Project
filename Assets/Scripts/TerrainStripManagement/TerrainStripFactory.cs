@@ -104,7 +104,7 @@ public class TerrainStripFactory : MonoBehaviour
         int randProp = Random.Range(0, TerrainProps.Count);
 
         //Want the first 5 strips to be all grass strips
-        if (_stripPool.Count < 6)
+        if (_stripPool.Count < 10)
         {
             _stripPool[_lastStripPos].SetupTerrainStrip(TerrainInfos[0], TerrainProps[0]);
             _lastStripPos++;
@@ -248,7 +248,7 @@ public class TerrainStripFactory : MonoBehaviour
         return TerrainInfos[randTerrain];
     }
 
-    private int RandomRangeExcept(int min, int max, int except)
+    public static int RandomRangeExcept(int min, int max, int except)
     {
         int randomNum;
         do

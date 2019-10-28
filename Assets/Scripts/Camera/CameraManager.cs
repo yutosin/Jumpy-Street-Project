@@ -22,7 +22,7 @@ public class CameraManager : MonoBehaviour
     void Start()
     {
         Cam = Camera.main;
-        _speed = 1f;
+        Speed = .3f;
     }
 
     private void Update()
@@ -40,7 +40,7 @@ public class CameraManager : MonoBehaviour
           of the screen*/
         if (!target)
             return;
-        _goalPos = Vector3.Lerp(transform.position, target.position, Time.deltaTime * .4f);
+        _goalPos = Vector3.Lerp(transform.position, target.position, Time.deltaTime * Speed);
         transform.position = new Vector3(transform.position.x, transform.position.y, _goalPos.z);
     }
 }

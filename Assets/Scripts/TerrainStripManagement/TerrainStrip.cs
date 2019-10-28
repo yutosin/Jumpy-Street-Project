@@ -34,15 +34,20 @@ public class TerrainStrip : MonoBehaviour
     private List<GameObject> _props;
     private List<Prop> _testProps;
     private MovableStripManager _movableStripManager;
+    private List<int> _tempInaccessibleCells = new List<int>(9);
+    
     private static float _lastLogDirection = -1.0f;
     
-    private static int _currentCell = 11;
+    private static int _currentCell = 10;
 
     private static int CurrentCell
     {
         get { return _currentCell; }
         set { _currentCell =  Mathf.Clamp(value, 6, 13); }
     }
+
+    private static TerrainType _lastTerrainType;
+    private static List<int> _inaccessibleCells = new List<int>(9);
 
     public int zPosKey;
     public bool IsMovable = false;
@@ -139,6 +144,15 @@ public class TerrainStrip : MonoBehaviour
                 objectChance = (Type == TerrainType.River) ? 0 : Random.Range(1, 3); //balance this
             else
                 objectChance = Random.Range(1, 7);
+
+            if (_lastTerrainType == TerrainType.Grass && Type == TerrainType.River && _inaccessibleCells.Contains(i))
+                objectChance = 2;
+            
+            if (_lastTerrainType == TerrainType.River && Type == TerrainType.Grass && !_inaccessibleCells.Contains(i))
+                objectChance = 2;
+
+            if (zPosKey == 0 && i == 10)
+                objectChance = 2;
             
             Cell tempCell = new Cell();
             tempCell.gridPos = new Vector3(xPosBase + (i * xPosIncrement), 0, zPos);
@@ -150,9 +164,16 @@ public class TerrainStrip : MonoBehaviour
                 _testProps.Add(cellProp);
                 
                 tempCell.accessible = cellProp.propAccessibility;
+                
+                if (!tempCell.accessible)
+                    _tempInaccessibleCells.Add(i);
             }
             else if (Type == TerrainType.River)
+            {
                 tempCell.accessible = false;
+                if (i < 6 || i > 13)
+                    _tempInaccessibleCells.Add(i);
+            }
             else
                 tempCell.accessible = true;
 
@@ -162,6 +183,8 @@ public class TerrainStrip : MonoBehaviour
         if (!IsMovable && _testProps.Count < 1 && prop.propPrefab != null)
         {
             int randomCellNum = Random.Range(6, 13);
+            if (zPosKey == 0)
+                randomCellNum = TerrainStripFactory.RandomRangeExcept(6, 13, 10);
             Cell tempCell = _cells[randomCellNum];
 
             Prop cellProp = PlaceProp(prop, tempCell.gridPos);
@@ -171,6 +194,9 @@ public class TerrainStrip : MonoBehaviour
 
             _cells[randomCellNum] = tempCell;
         }
+
+        _inaccessibleCells = _tempInaccessibleCells;
+        _lastTerrainType = Type;
     }
 
     public Cell GetNearestCell(Vector3 point)
