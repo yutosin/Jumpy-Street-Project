@@ -367,6 +367,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e25aa77edaf8f436a9415699f56c1b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  target: {fileID: 0}
 --- !u!1 &973316025
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,12 +409,16 @@ MonoBehaviour:
   TerrainProps:
   - propPrefab: {fileID: 5179484007214689567, guid: 798098305dff24196b589a3054d46706,
       type: 3}
+    gameObject: {fileID: 0}
     propAccessibility: 0
     propTerrain: 0
+    yOffset: 0
   - propPrefab: {fileID: 6321995580084697199, guid: 77b14236b4ac0485f8d0f01cf78e5660,
       type: 3}
+    gameObject: {fileID: 0}
     propAccessibility: 0
     propTerrain: 2
+    yOffset: 0
   TerrainStripPrefab: {fileID: 6158682865970832215, guid: 9dffd366d6fd0492d8c8640c338110b0,
     type: 3}
   NumStrips: 25
@@ -457,6 +462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stripManager: {fileID: 973316026}
+  _animator: {fileID: 486154054}
 --- !u!23 &180603789528216422
 MeshRenderer:
   m_ObjectHideFlags: 0
