@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
 {
     public static GameObject playerObject;
     public static bool isInRiver = false;
+    public bool IgnoreCars = false;
 
     private void Awake()
     {
@@ -90,11 +91,16 @@ public class PlayerMovement : MonoBehaviour
     //Handles the actions involving the player and the different in-game vehicles
     {
         Debug.Log("Collision Detected");
-        if (collision.gameObject.tag == "Vehicle")
+        if (collision.gameObject.tag == "Vehicle" && !IgnoreCars)
         //holds the code that tells the game to reset the scene once the player hits or gets hit by a vehicle
         {
             Destroy(gameObject);
         }
 
+    }
+
+    private void OnDestroy()
+    {
+        GameScripts.SharedInstance.ScoreManager.UpdateHighScore();
     }
 }
