@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 public enum MoveDirection
 {
     UP,
@@ -11,8 +13,22 @@ public enum MoveDirection
 
 public class PlayerMovement : MonoBehaviour
 {
-    public TerrainStripFactory stripManager;
-    
+    public static GameObject playerObject;
+    public static bool isInRiver = false;
+
+    private void Awake()
+    {
+        playerObject = gameObject;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
     void LateUpdate()
     {
         Vector3 nextPosition = HandleMovement();
@@ -52,21 +68,33 @@ public class PlayerMovement : MonoBehaviour
         //also might want to use getAxis code
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.UP);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.UP);
         }
         if (Input.GetKeyDown(KeyCode.S ) || Input.GetKeyDown(KeyCode.DownArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.DOWN);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.DOWN);
         }
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.LEFT);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.LEFT);
         }
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
-            return stripManager.GetNextPosition(MoveDirection.RIGHT);
+            return TerrainStripFactory.SharedInstance.GetNextPosition(MoveDirection.RIGHT);
         }
         
         return Vector3.zero;
+    }
+
+    private void OnTriggerEnter(Collider collision)
+    //Handles the actions involving the player and the different in-game vehicles
+    {
+        Debug.Log("Collision Detected");
+        if (collision.gameObject.tag == "Vehicle")
+        //holds the code that tells the game to reset the scene once the player hits or gets hit by a vehicle
+        {
+            Destroy(gameObject);
+        }
+
     }
 }

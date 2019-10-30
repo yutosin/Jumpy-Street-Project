@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6158682865970832217}
   - component: {fileID: 6158682865970832216}
   - component: {fileID: 101618225345651230}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TerrainStrip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -104,4 +104,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11468efdbb78d4468a5ffb0132d86a54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 0
+  zPosKey: 0
