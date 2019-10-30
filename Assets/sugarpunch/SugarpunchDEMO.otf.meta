@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ba1c08c394ac25c488b80338da3a9e65
+guid: 78a90e57f20cefc4fb22b47cc2a143d0
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -8,9 +8,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: Cute Jellyfish
+  fontName: Sugarpunch DEMO
   fontNames:
-  - Cute Jellyfish
+  - Sugarpunch DEMO
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
