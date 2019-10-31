@@ -348,6 +348,7 @@ public class TerrainStripFactory : MonoBehaviour
                 bool accessible = nextCell.accessible;
                 if (!accessible)
                     --currentStrip;
+               
 
                 break;
             case MoveDirection.DOWN:

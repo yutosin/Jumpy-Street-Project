@@ -37,6 +37,8 @@ public class TerrainStrip : MonoBehaviour
     private List<int> _tempInaccessibleCells = new List<int>(9);
     
     private static float _lastLogDirection = -1.0f;
+    private bool _isMovable = false;
+    private bool _visited = false;
     
     private static int _currentCell = 10;
 
@@ -50,7 +52,18 @@ public class TerrainStrip : MonoBehaviour
     private static List<int> _inaccessibleCells = new List<int>(9);
 
     public int zPosKey;
-    public bool IsMovable = false;
+
+    public bool IsMovable
+    {
+        get { return _isMovable; }
+        private set { _isMovable = value;  }
+    }
+
+    public bool Visited
+    {
+        get { return _visited; }
+        private set { _visited = value; }
+    }
     
     public delegate void OnStripInactive(TerrainStrip strip);
     
@@ -224,6 +237,14 @@ public class TerrainStrip : MonoBehaviour
         switch (direction)
         {
             case MoveDirection.UP:
+                if (zPosKey > 0)
+                {
+                    if (!Visited)
+                        GameScripts.SharedInstance.ScoreManager.IncrementScore(); 
+                    Visited = true;
+                }
+                    
+                break;
             case MoveDirection.DOWN:
                 break;
             case MoveDirection.LEFT:
