@@ -317,8 +317,9 @@ public class TerrainStripFactory : MonoBehaviour
         if (colliders.Length == 0)
         {
             //Destroy(PlayerMovement.playerObject);
+            PlayerMovement.isInRiver = false;
             SceneManager.LoadScene("TitleScreen");
-            return nextCell.gridPos;
+            //return nextCell.gridPos;
         }
 
         Vector3 logPos = Vector3.zero;
@@ -335,8 +336,9 @@ public class TerrainStripFactory : MonoBehaviour
         if (logPos == Vector3.zero)
         {
             //Destroy(PlayerMovement.playerObject);
+            PlayerMovement.isInRiver = false;
             SceneManager.LoadScene("TitleScreen");
-            return nextCell.gridPos;
+            //return nextCell.gridPos;
         }
 
 

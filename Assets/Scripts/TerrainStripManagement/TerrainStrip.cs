@@ -187,6 +187,8 @@ public class TerrainStrip : MonoBehaviour
                 if (i < 6 || i > 13)
                     _tempInaccessibleCells.Add(i);
             }
+            else if(i < 6 || i > 13)
+                tempCell.accessible = false;
             else
                 tempCell.accessible = true;
 
