@@ -22,7 +22,7 @@ public class CameraManager : MonoBehaviour
     void Start()
     {
         Cam = Camera.main;
-        Speed = .3f;
+        Speed = .2f;
     }
 
     private void Update()

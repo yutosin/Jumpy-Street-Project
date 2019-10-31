@@ -47,7 +47,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 viewPos = CameraManager.Cam.WorldToViewportPoint(transform.position);
         if (viewPos.x < -0.015 || viewPos.y < -0.04)
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            SceneManager.LoadScene("TitleScreen");
         }
         
         //To do: modify this to somehow keep consistent speed on camera when close to bottom of screen?
@@ -94,7 +95,8 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.tag == "Vehicle" && !IgnoreCars)
         //holds the code that tells the game to reset the scene once the player hits or gets hit by a vehicle
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            SceneManager.LoadScene("TitleScreen");
         }
 
     }

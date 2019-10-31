@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 [System.Serializable]
@@ -259,6 +260,17 @@ public class TerrainStripFactory : MonoBehaviour
         return randomNum;
     }
     
+    public static float RandomRangeExcept(float min, float max, float except)
+    {
+        float randomNum;
+        do
+        {
+            randomNum = Random.Range(min, max);
+        } while (randomNum == except);
+
+        return randomNum;
+    }
+    
     private void OnStripInactive(TerrainStrip strip)
     {
         _unusedStrips.Push(strip.zPosKey);
@@ -304,7 +316,8 @@ public class TerrainStripFactory : MonoBehaviour
         Collider[] colliders = Physics.OverlapBox(checkPoint, overlapCube, Quaternion.identity, mask);
         if (colliders.Length == 0)
         {
-            Destroy(PlayerMovement.playerObject);
+            //Destroy(PlayerMovement.playerObject);
+            SceneManager.LoadScene("TitleScreen");
             return nextCell.gridPos;
         }
 
@@ -321,7 +334,8 @@ public class TerrainStripFactory : MonoBehaviour
 
         if (logPos == Vector3.zero)
         {
-            Destroy(PlayerMovement.playerObject);
+            //Destroy(PlayerMovement.playerObject);
+            SceneManager.LoadScene("TitleScreen");
             return nextCell.gridPos;
         }
 
