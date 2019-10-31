@@ -391,5 +391,6 @@ public class TerrainStripFactory : MonoBehaviour
     private void OnDestroy()
     {
         TerrainStrip.StripInactive -= OnStripInactive;
+        TerrainStrip.ResetCurrentCell();
     }
 }

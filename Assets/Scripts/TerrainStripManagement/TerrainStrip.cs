@@ -164,7 +164,7 @@ public class TerrainStrip : MonoBehaviour
             if (_lastTerrainType == TerrainType.River && Type == TerrainType.Grass && !_inaccessibleCells.Contains(i))
                 objectChance = 2;
 
-            if (zPosKey == 0 && i == 10)
+            if (zPosKey < 3 && i == 10)
                 objectChance = 2;
             
             Cell tempCell = new Cell();
@@ -260,7 +260,7 @@ public class TerrainStrip : MonoBehaviour
             default:
                 break;
         }
-        return _cells[_currentCell];
+        return _cells[CurrentCell];
     }
 
     private void BoundsCheck()
@@ -295,5 +295,10 @@ public class TerrainStrip : MonoBehaviour
     private void Update()
     {
         BoundsCheck();
+    }
+
+    public static void ResetCurrentCell()
+    {
+        CurrentCell = 10;
     }
 }
