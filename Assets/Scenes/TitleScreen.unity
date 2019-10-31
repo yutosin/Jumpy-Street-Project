@@ -829,12 +829,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1234004480}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fee67a99666f18d45afcfb991e1ec6cc, type: 3}
+  m_Script: {fileID: 11500000, guid: e325f8f83900e4b24b606f205fd3fcdc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StartButton: {fileID: 1491923966}
-  HelpButton: {fileID: 457115090}
-  QuitButton: {fileID: 1727914864}
 --- !u!4 &1234004482
 Transform:
   m_ObjectHideFlags: 0

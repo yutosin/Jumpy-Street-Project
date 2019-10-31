@@ -101,10 +101,7 @@ public class TerrainStripFactory : MonoBehaviour
             Instantiate(TerrainStripPrefab, new Vector3(0, 0, _lastStripPos), Quaternion.identity);
         _stripPool.Add(_lastStripPos, tempStrip.GetComponent<TerrainStrip>());
 
-        //In the future we not doing this randomly or at all; the TS will just grab the prop based on terrain type
-        int randProp = Random.Range(0, TerrainProps.Count);
-
-        //Want the first 5 strips to be all grass strips
+        //Want the first 9 strips to be all grass strips
         if (_stripPool.Count < 10)
         {
             _stripPool[_lastStripPos].SetupTerrainStrip(TerrainInfos[0], TerrainProps[0]);
@@ -144,7 +141,6 @@ public class TerrainStripFactory : MonoBehaviour
             unusedStrip.gameObject.transform.position = new Vector3(0, 0, _lastStripPos);
 
             //In the future we not doing this randomly or at all; the TS will just grab the prop based on terrain type
-            //int riverPropChance = Random.Range(1, 5);
 
             TerrainInfo newTerrainInfo = CreateWeightedTerrainInfo();
             //Ugly ugly code; need a better way of defining rules for terrain strips
@@ -316,10 +312,8 @@ public class TerrainStripFactory : MonoBehaviour
         Collider[] colliders = Physics.OverlapBox(checkPoint, overlapCube, Quaternion.identity, mask);
         if (colliders.Length == 0)
         {
-            //Destroy(PlayerMovement.playerObject);
-            PlayerMovement.isInRiver = false;
-            SceneManager.LoadScene("TitleScreen");
-            //return nextCell.gridPos;
+            Destroy(PlayerMovement.playerObject);
+            GameScripts.SharedInstance.deathPanel.SetActive(true);
         }
 
         Vector3 logPos = Vector3.zero;
@@ -335,10 +329,8 @@ public class TerrainStripFactory : MonoBehaviour
 
         if (logPos == Vector3.zero)
         {
-            //Destroy(PlayerMovement.playerObject);
-            PlayerMovement.isInRiver = false;
-            SceneManager.LoadScene("TitleScreen");
-            //return nextCell.gridPos;
+            Destroy(PlayerMovement.playerObject);
+            GameScripts.SharedInstance.deathPanel.SetActive(true);
         }
 
 

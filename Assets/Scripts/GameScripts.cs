@@ -12,6 +12,7 @@ public class GameScripts : MonoBehaviour
 
     public TerrainStripFactory Factory;
     public ScoreManager ScoreManager;
+    public GameObject deathPanel;
     
     private void Awake()
     {

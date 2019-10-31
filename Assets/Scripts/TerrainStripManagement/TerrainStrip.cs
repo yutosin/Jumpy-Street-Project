@@ -228,6 +228,9 @@ public class TerrainStrip : MonoBehaviour
                 {
                     CurrentCell = i;
                 }
+                if (!Visited)
+                    GameScripts.SharedInstance.ScoreManager.IncrementScore(); 
+                Visited = true;
             }
         }
 

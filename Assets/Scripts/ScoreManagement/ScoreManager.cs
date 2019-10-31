@@ -7,7 +7,7 @@ public class ScoreManager : MonoBehaviour
 {
     public Text ScoreText, HighScoreText;
     
-    private int HighScore, Score;
+    private int Score;
     
 
 
@@ -15,10 +15,10 @@ public class ScoreManager : MonoBehaviour
     void Start()
     {
         Score = 0;
-        HighScore = 0;
 
         ScoreText.text = Score.ToString();
-        HighScoreText.text = HighScore.ToString();
+        int storedHighScore = PlayerPrefs.GetInt("HighScore",0);
+        HighScoreText.text = storedHighScore.ToString();
 
     }
 

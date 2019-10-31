@@ -20,7 +20,8 @@ public class MovableStripManager
     private float _logDirection = 0;
     private bool _isActive = false;
     private float _lastStripSpeed = 0;
-    private int _lastPropOffset, _lastNumProps, _lastCarChoice = 0;
+    private int _lastPropOffset, _lastNumProps = 0;
+    private int _lastCarChoice = -1;
 
     public bool IsActive
     {
@@ -84,12 +85,9 @@ public class MovableStripManager
     private void SetupRiverType()
     {
         //All these values need balancing
-        //float speed = Random.Range(1, 3);
         float speed = TerrainStripFactory.RandomRangeExcept(1, 3, _lastStripSpeed);
-        //int propOffset = Random.Range(4, 6);
         int propOffset = TerrainStripFactory.RandomRangeExcept(4, 6, _lastPropOffset);
         int numProps = Random.Range(3, 5);
-        //int randomSign = Random.Range(0, 2) * 2 - 1;
 
         for (int i = 0; i < numProps; i++)
         {
@@ -110,14 +108,10 @@ public class MovableStripManager
     private void SetupRoadType()
     {
         //All these values need balancing
-        //float speed = Random.Range(1.5f, 3);
         float speed = TerrainStripFactory.RandomRangeExcept(1.5f, 3, _lastStripSpeed);
-        //int propOffset = Random.Range(3, 6);
         int propOffset = TerrainStripFactory.RandomRangeExcept(3, 6, _lastPropOffset);
-        //int numProps = Random.Range(3, 5);
         int numProps = TerrainStripFactory.RandomRangeExcept(3, 5, _lastNumProps);
         int randomSign = Random.Range(0, 2) * 2 - 1;
-        //int carChoice = Random.Range(0, _usableRoadTypes.Length);
         int carChoice = TerrainStripFactory.RandomRangeExcept(0, _usableRoadTypes.Length, _lastCarChoice);
 
         for (int i = 0; i < numProps; i++)
@@ -133,11 +127,6 @@ public class MovableStripManager
             _movableProps.Add(tempMovableProp);
         }
     }
-
-//    private void SetupTrainType()
-//    {
-//        
-//    }
 
     public void ReturnToInactive()
     {
