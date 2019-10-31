@@ -33,6 +33,10 @@ public class TerrainStrip : MonoBehaviour
     private TerrainInfo _terrainInfo;
     private List<GameObject> _props;
     private List<Prop> _testProps;
+    private MovableStripManager _movableStripManager;
+    private static float _lastLogDirection = -1.0f;
+    private bool _isMovable = false;
+    private bool _visited = false;
     
     private static int _currentCell = 11;
 
@@ -43,6 +47,18 @@ public class TerrainStrip : MonoBehaviour
     }
 
     public int zPosKey;
+
+    public bool IsMovable
+    {
+        get { return _isMovable; }
+        private set { _isMovable = value;  }
+    }
+
+    public bool Visited
+    {
+        get { return _visited; }
+        private set { _visited = value; }
+    }
     
     public delegate void OnStripInactive(TerrainStrip strip);
     
@@ -53,12 +69,25 @@ public class TerrainStrip : MonoBehaviour
         get { return _terrainInfo.type; }
     }
 
-    public void SetupTerrainStrip(TerrainInfo terrainInfo, Prop prop = new Prop())
+    public void SetupTerrainStrip(TerrainInfo terrainInfo, Prop prop = new Prop(), bool movable = false)
     {
         _cells = new List<Cell>(20); //All strips contain 20 cells corresponding to their width
         _testProps = new List<Prop>(20);
         zPosKey = (int)transform.position.z;
         SetTerrainInfo(terrainInfo);
+        _movableStripManager = new MovableStripManager();
+        IsMovable = movable;
+        if (movable)
+        {
+            if (Type == TerrainType.River)
+            {
+                _movableStripManager.SetupManager(Type, zPosKey, _lastLogDirection);
+                _lastLogDirection = _lastLogDirection * -1;
+            }
+            else
+                _movableStripManager.SetupManager(Type, zPosKey);
+        }
+
         if (prop.propPrefab != null)
         {
             CreateCells(prop);
@@ -67,15 +96,26 @@ public class TerrainStrip : MonoBehaviour
         CreateCells();
     }
 
-    public void ReassignTerrainStrip(TerrainInfo terrainInfo, Prop prop = new Prop())
+    public void ReassignTerrainStrip(TerrainInfo terrainInfo, Prop prop = new Prop(), bool movable = false)
     {
+        zPosKey = (int)transform.position.z;
         SetTerrainInfo(terrainInfo);
+        IsMovable = movable;
+        if (movable)
+        {
+            if (Type == TerrainType.River)
+            {
+                _movableStripManager.SetupManager(Type, zPosKey, _lastLogDirection);
+                _lastLogDirection = _lastLogDirection * -1;
+            }
+            else
+                _movableStripManager.SetupManager(Type, zPosKey);
+        }
         if (prop.propPrefab != null)
             CreateCells(prop);
         else
             CreateCells();
         gameObject.SetActive(true);
-        zPosKey = (int)transform.position.z;
     }
 
     private void SetTerrainInfo(TerrainInfo terrainInfo)
@@ -86,6 +126,15 @@ public class TerrainStrip : MonoBehaviour
             _terrainInfo = terrainInfo;
             rend.material = _terrainInfo.mat;
         }
+    }
+
+    private Prop PlaceProp(Prop prop, Vector3 placement)
+    {
+        Prop cellProp = prop;
+        cellProp.gameObject = TerrainStripFactory.GetUsablePropFromPool(prop);
+        cellProp.gameObject.transform.position = new Vector3(placement.x, 1 + prop.yOffset, placement.z);
+        cellProp.gameObject.SetActive(true);
+        return cellProp;
     }
 
     private void CreateCells(Prop prop = new Prop())
@@ -100,31 +149,61 @@ public class TerrainStrip : MonoBehaviour
             
             //Also very ugly code; need a better way of setting prop rules for strip
             if (i < 6 || i > 13)
-                objectChance = Random.Range(1, 3); //balance this
+                objectChance = (Type == TerrainType.River) ? 0 : Random.Range(1, 3); //balance this
             else
                 objectChance = Random.Range(1, 7);
             
             Cell tempCell = new Cell();
             tempCell.gridPos = new Vector3(xPosBase + (i * xPosIncrement), 0, zPos);
             
-            if (objectChance == 1 && prop.propPrefab != null)
+            if (!IsMovable && objectChance == 1 && prop.propPrefab != null)
             {
-                Prop cellProp = prop;
-                cellProp.gameObject = TerrainStripFactory.GetUsablePropFromPool(prop);
-                cellProp.gameObject.transform.position = new Vector3(tempCell.gridPos.x, 1 + prop.yOffset, tempCell.gridPos.z);
-                cellProp.gameObject.SetActive(true);
+                Prop cellProp = PlaceProp(prop, tempCell.gridPos);
                 
                 _testProps.Add(cellProp);
                 
                 tempCell.accessible = cellProp.propAccessibility;
             }
+            else if (Type == TerrainType.River)
+                tempCell.accessible = false;
             else
-            {
                 tempCell.accessible = true;
-            }
 
             _cells.Add(tempCell);
         }
+
+        if (!IsMovable && _testProps.Count < 1 && prop.propPrefab != null)
+        {
+            int randomCellNum = Random.Range(6, 13);
+            Cell tempCell = _cells[randomCellNum];
+
+            Prop cellProp = PlaceProp(prop, tempCell.gridPos);
+            _testProps.Add(cellProp);
+                
+            tempCell.accessible = cellProp.propAccessibility;
+
+            _cells[randomCellNum] = tempCell;
+        }
+    }
+
+    public Cell GetNearestCell(Vector3 point)
+    {
+        Cell nearestCell = default(Cell);
+        for (int i = 0; i < _cells.Count; i++)
+        {
+            if (point.x > _cells[i].gridPos.x && point.x < _cells[i].gridPos.x + .5f
+                || point.x < _cells[i].gridPos.x && point.x > _cells[i].gridPos.x - .5f
+                || point.x == _cells[i].gridPos.x)
+            {
+                nearestCell = _cells[i];
+                if (_cells[i].accessible)
+                {
+                    CurrentCell = i;
+                }
+            }
+        }
+
+        return nearestCell;
     }
 
     public Cell GetCell(MoveDirection direction)
@@ -132,6 +211,14 @@ public class TerrainStrip : MonoBehaviour
         switch (direction)
         {
             case MoveDirection.UP:
+                if (zPosKey > 0)
+                {
+                    if (!Visited)
+                        GameScripts.SharedInstance.ScoreManager.IncrementScore(); 
+                    Visited = true;
+                }
+                    
+                break;
             case MoveDirection.DOWN:
                 break;
             case MoveDirection.LEFT:
@@ -162,12 +249,23 @@ public class TerrainStrip : MonoBehaviour
             gameObject.SetActive(false);
             _testProps.Clear();
             _cells.Clear();
+            if (IsMovable)
+                _movableStripManager.ReturnToInactive();
             
             if (StripInactive != null)
                 StripInactive.Invoke(this);
         }
     }
-    
+
+    private void OnDrawGizmos()
+    {
+        for (int i = 0; i < _cells.Count; i++)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(_cells[i].gridPos, Vector3.one);
+        }
+    }
+
     private void Update()
     {
         BoundsCheck();

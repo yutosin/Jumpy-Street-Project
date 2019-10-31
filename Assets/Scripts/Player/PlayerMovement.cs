@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 public enum MoveDirection
 {
     UP,
@@ -15,10 +17,27 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private Animator _animator;
 
+    public static GameObject playerObject;
+    public static bool isInRiver = false;
+    public bool IgnoreRiver = false;
+    public bool IgnoreCars = false;
+
     private bool _canMove = false;
 
     private Vector3 _nextPosition;
 
+    private void Awake()
+    {
+        playerObject = gameObject;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
     /*
      * Just to explain my train of thought. I decided to make the nextPosition varaible into a class varaible
      * as to commit the value to the objects "memory" where as the bool sort of as a safe proof to prevent the player
@@ -37,7 +56,7 @@ public class PlayerMovement : MonoBehaviour
 
             if (_nextPosition != Vector3.zero)
             {
-                transform.position = new Vector3(_nextPosition.x, 1, _nextPosition.z);
+                //transform.position = new Vector3(_nextPosition.x, 1, _nextPosition.z);
                 _canMove = false;
             }
         }
@@ -72,27 +91,31 @@ public class PlayerMovement : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
+            GameScripts.SharedInstance.LastMoveDirection = MoveDirection.UP;
             _animator.SetTrigger("jumped");
             transform.rotation = Quaternion.Euler(-90, 0, 0);
-            StartCoroutine(Delay(60, MoveDirection.UP));
+            //StartCoroutine(Delay(60, MoveDirection.UP));
         }
         if(Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
+            GameScripts.SharedInstance.LastMoveDirection = MoveDirection.LEFT;
             _animator.SetTrigger("jumped");
             transform.rotation = Quaternion.Euler(-90, -90, 0);
-            StartCoroutine(Delay(60, MoveDirection.LEFT));
+            //StartCoroutine(Delay(60, MoveDirection.LEFT));
         }
         if(Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
+            GameScripts.SharedInstance.LastMoveDirection = MoveDirection.RIGHT;
             _animator.SetTrigger("jumped");
             transform.rotation = Quaternion.Euler(-90, 90, 0);
-            StartCoroutine(Delay(60, MoveDirection.RIGHT));
+            //StartCoroutine(Delay(60, MoveDirection.RIGHT));
         }
         if(Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
         {
+            GameScripts.SharedInstance.LastMoveDirection = MoveDirection.DOWN;
             _animator.SetTrigger("jumped");
             transform.rotation = Quaternion.Euler(-90, -180, 0);
-            StartCoroutine(Delay(60, MoveDirection.DOWN));
+            //StartCoroutine(Delay(60, MoveDirection.DOWN));
         }
     }
 
@@ -161,5 +184,22 @@ public class PlayerMovement : MonoBehaviour
 
         _canMove = true;
         _nextPosition = HandleMovement(direction);
+    }
+
+    private void OnTriggerEnter(Collider collision)
+    //Handles the actions involving the player and the different in-game vehicles
+    {
+        Debug.Log("Collision Detected");
+        if (collision.gameObject.tag == "Vehicle" && !IgnoreCars)
+        //holds the code that tells the game to reset the scene once the player hits or gets hit by a vehicle
+        {
+            Destroy(gameObject);
+        }
+
+    }
+
+    private void OnDestroy()
+    {
+        GameScripts.SharedInstance.ScoreManager.UpdateHighScore();
     }
 }
